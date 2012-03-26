@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="add_items">Add to the Fridge!</string>
+    <string name="app_name">Hey! What\'s in the Fridge?</string>
+    <string name="submit_add">Add</string>
+    <string name="submit_update">Update</string>
+    <string name="cancel_update">Cancel</string>
+    <string name="show_inventory">Show Inventory</string>
+</resources>
