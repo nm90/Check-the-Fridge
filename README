@@ -16,12 +16,12 @@
 #Setup tortoiseGit with windows:
 http://damianflannery.wordpress.com/2010/09/23/using-tortoisegit-on-windows-for-your-android-project/
 
-#Install Aptana eclipse plugin from
+#Install Django
+[[https://www.djangoproject.com/]]
 [[http://download.aptana.com/studio3/plugin/install]]
-#Install under help->install_new_software
-#Android ADT: https://dl-ssl.google.com/android/eclipse/
-#Go to file->Import: General/Existing Projects into Workspace
 
+
+==Rescources==
 #Developing Android REST client applications
 http://www.google.com/events/io/2010/sessions/developing-RESTful-android-apps.html
 
