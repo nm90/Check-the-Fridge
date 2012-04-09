@@ -59,47 +59,7 @@ public class FridgeActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		dataHelper = new DataHelper(this);
-		
-		HttpParams myParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(myParams, 10000);
-		HttpConnectionParams.setSoTimeout(myParams, 10000);
-
-		HttpClient httpClient = new DefaultHttpClient(myParams);
-		HttpContext localContext = new BasicHttpContext();
-		HttpPut httpPut = new HttpPut("http://localhost:8080/api/items/1");
-		httpPut.setHeader("Accept", "application/json");
-		httpPut.setHeader("Content-Type", "application/json");
-
-		String data = "";// put your JSON object here
-		StringEntity tmp = null;
-		try {
-			tmp = new StringEntity(data, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-
-		httpPut.setEntity(tmp);
-		HttpResponse response = null;
-		try {
-			response = httpClient.execute(httpPut, localContext);
-		} catch (ClientProtocolException e) {
-			
-			e.printStackTrace();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
-
-		try {
-			String result = EntityUtils.toString(response.getEntity());
-		} catch (ParseException e) {
-			
-			e.printStackTrace();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
-		
+				
 	}
 
 	/*
@@ -142,6 +102,61 @@ public class FridgeActivity extends Activity {
 		default:
 			return super.onContextItemSelected(item);
 		}
+	}
+	
+	protected void setupHttpRequest(){
+		//TODO FIX this is only an example to test Android/Django interaction	
+		HttpParams myParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(myParams, 10000);
+		HttpConnectionParams.setSoTimeout(myParams, 10000);
+
+		HttpClient httpClient = new DefaultHttpClient(myParams);
+		HttpContext localContext = new BasicHttpContext();
+		HttpPut httpPut = new HttpPut("http://localhost:8000/admin/fridge/item/add/");
+		httpPut.setHeader("Accept", "application/json");
+		httpPut.setHeader("Content-Type", "application/json");
+
+		String data = // put your JSON object here
+				"[ " +
+				"	{" +
+				"		\"pk\": \"AndroidItem\", " +
+				"		\"model\": \"fridge.item\"," +
+				"		\"fields\": {" +
+				"			\"amount\": 42," +
+				"			\"fridge\": 1" +
+				"		}" +
+				"	}" +
+				"]";
+		StringEntity tmp = null;
+		try {
+			tmp = new StringEntity(data, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		httpPut.setEntity(tmp);
+		HttpResponse response = null;
+		try {
+			response = httpClient.execute(httpPut, localContext);
+		} catch (ClientProtocolException e) {
+			
+			e.printStackTrace();
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+
+		try {
+			String result = EntityUtils.toString(response.getEntity());
+		} catch (ParseException e) {
+			
+			e.printStackTrace();
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		
+
 	}
 
 	protected Dialog onCreateDialog(int id) {
@@ -268,11 +283,13 @@ public class FridgeActivity extends Activity {
 	 * update item with count
 	 */
 	protected void updateItem(String name, int count) {
+		//TODO FIX BUG. Updating local Android DB causes app to crash
 		ContentValues updateItem = new ContentValues();
 		database = dataHelper.getWritableDatabase();
 		
 		updateItem.put("name", name);
 		updateItem.put("amount", count);
+		
 		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, database.CONFLICT_NONE);
 		
 		// requery to refresh listview to reflect db changes
