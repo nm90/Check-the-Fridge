@@ -18,6 +18,9 @@ http://damianflannery.wordpress.com/2010/09/23/using-tortoisegit-on-windows-for-
 
 #Install Django
 [[https://www.djangoproject.com/]]
+export PATH=/path/to/django/trunk
+ln -sn /path/to/django/bin/django-admin.py ./django-admin.py
+export DJANGO_SETTINGS_MODULE=fridge.settings
 
 
 ==Rescources==
