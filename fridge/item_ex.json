@@ -1,0 +1,10 @@
+[
+    {
+        "pk": "Guiness",
+        "model": "fridge.item",
+        "fields": {
+            "amount": 5,
+            "fridge": 1
+        }
+    }
+]
