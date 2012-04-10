@@ -295,7 +295,7 @@ public class FridgeActivity extends Activity {
 		updateItem.put("name", name);
 		updateItem.put("amount", count);
 		
-		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, database.CONFLICT_NONE);
+		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, database.CONFLICT_IGNORE);
 		
 		// requery to refresh listview to reflect db changes
 		data.requery();
