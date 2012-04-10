@@ -3,6 +3,7 @@
 
     <string name="add_items">Add to the Fridge!</string>
     <string name="app_name">Hey! What\'s in the Fridge?</string>
+    <string name="add_scan">Scan Barcode</string>
     <string name="submit_add">Add</string>
     <string name="submit_update">Update</string>
     <string name="cancel_update">Cancel</string>

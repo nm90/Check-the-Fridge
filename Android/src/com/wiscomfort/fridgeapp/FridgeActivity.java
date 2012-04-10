@@ -83,12 +83,6 @@ public class FridgeActivity extends Activity {
 			// Show the dialog for adding an item
 			this.showDialog(ADD_ITEM_DIALOG);
 
-			/*
-            	Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
-						com.wiscomfort.fridgeapp.AddItemActivity.class);
-
-            	startActivity(i);
-			 */
 			return true;
 
 		case R.id.show_inventory:
@@ -196,6 +190,17 @@ public class FridgeActivity extends Activity {
 		debug = "text: " + text.toString();
 		Log.d(TAG, debug);
 
+		Button scan = (Button) dialog.findViewById(R.id.add_via_scan);
+		scan.setOnClickListener( new OnClickListener() {
+			public void onClick(View v){
+            	Intent i = new Intent("com.google.zxing.client.android.SCAN");
+
+            	startActivityForResult(i, 1);
+				
+				dialog.dismiss();
+			}
+		});
+		
 		Button submit = (Button) dialog.findViewById(R.id.submit_add);
 		submit.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
