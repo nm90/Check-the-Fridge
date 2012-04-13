@@ -6,12 +6,15 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'TheFridge.views.home', name='home'),
+    url(r'^fridge/datetime', 'fridge.views.current_datetime', name='datetime'),
+    url(r'^fridge/fridges', 'fridge.views.getFridge', name='fridges'),
+    url(r'^fridge/login', 'fridge.views.fridge_login', name='login'),
+
     # url(r'^TheFridge/', include('TheFridge.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:
-     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
+     url(r'^fridge/admin/doc/', include('django.contrib.admindocs.urls')),
 
     # Uncomment the next line to enable the admin:
-     url(r'^admin/', include(admin.site.urls)),
+     url(r'^fridge/admin/', include(admin.site.urls)),
 )
