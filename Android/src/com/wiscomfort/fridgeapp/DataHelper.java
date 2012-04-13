@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 
 /**
- *
+ *		
  * Helper class to initialize database to store info between sessions
  *
  * @author neil

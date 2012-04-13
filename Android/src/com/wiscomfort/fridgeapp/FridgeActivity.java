@@ -40,6 +40,7 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class FridgeActivity extends Activity {
 
@@ -205,12 +206,17 @@ public class FridgeActivity extends Activity {
 		submit.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
 				String itemToAdd = editItemName.getText().toString();
-				if (!itemToAdd.isEmpty()) { addItem(itemToAdd); }
-
+				if (!itemToAdd.isEmpty()) { 
+					addItem(itemToAdd);
+				}
 				// empty EditText and close dialog window
+				
 				editItemName.setText("");			
-				dialog.dismiss();		
+				dialog.dismiss();
+
 			}
+			
+			
 		});
 
 		debug = "addItemSubmit: " + submit.toString();
@@ -241,12 +247,26 @@ public class FridgeActivity extends Activity {
 		Button submit = (Button) dialog.findViewById(R.id.submit_update);
 		submit.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
-				int count = Integer.parseInt(countBox.getText().toString());
+				int count = 0;
+				try{
+					count = Integer.parseInt(countBox.getText().toString());
+				}catch(NumberFormatException nfe){
+					countBox.setText("");
+					dialog.dismiss();
+					Toast.makeText(getApplicationContext(), "Not a number!", Toast.LENGTH_SHORT).show();
+					return;
+				}
 				System.out.print(count);
-				updateItem(selectedItem, count);
-				
+				if(count == 0){
+					removeItem(selectedItem);
+				}
+				else if(count < 0){
+					Toast.makeText(getApplicationContext(), "Can't have Negative Items!", Toast.LENGTH_SHORT).show();
+				}
+				else{
+					updateItem(selectedItem, count);
+				}
 				countBox.setText("");
-				
 				dialog.dismiss();
 			}
 		});
@@ -263,13 +283,16 @@ public class FridgeActivity extends Activity {
 		long itemId;
 
 		database = dataHelper.getWritableDatabase();
-
+				
 		updateItem.put("name", name);
+		
 		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, CONFLICT_IGNORE);
 
 		// requery to refresh listview to reflect db changes
 		data.requery();
-	}
+		selectedItem = name;
+		showDialog(UPDATE_ITEM_DIALOG);
+		}
 
 	/*
 	 * remove item with name from db
@@ -287,6 +310,7 @@ public class FridgeActivity extends Activity {
 	/*
 	 * update item with count
 	 */
+	
 	protected void updateItem(String name, int count) {
 		//TODO FIX BUG. Updating local Android DB causes app to crash
 		ContentValues updateItem = new ContentValues();
