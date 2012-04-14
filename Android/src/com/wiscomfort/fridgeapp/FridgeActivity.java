@@ -3,19 +3,6 @@ package com.wiscomfort.fridgeapp;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.ParseException;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.util.EntityUtils;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -99,61 +86,7 @@ public class FridgeActivity extends Activity {
 		}
 	}
 	
-	protected void setupHttpRequest(){
-		//TODO FIX this is only an example to test Android/Django interaction	
-		HttpParams myParams = new BasicHttpParams();
-		HttpConnectionParams.setConnectionTimeout(myParams, 10000);
-		HttpConnectionParams.setSoTimeout(myParams, 10000);
-
-		HttpClient httpClient = new DefaultHttpClient(myParams);
-		HttpContext localContext = new BasicHttpContext();
-		HttpPut httpPut = new HttpPut("http://localhost:8000/admin/fridge/item/add/");
-		httpPut.setHeader("Accept", "application/json");
-		httpPut.setHeader("Content-Type", "application/json");
-
-		String data = // put your JSON object here
-				"[ " +
-				"	{" +
-				"		\"pk\": \"AndroidItem\", " +
-				"		\"model\": \"fridge.item\"," +
-				"		\"fields\": {" +
-				"			\"amount\": 42," +
-				"			\"fridge\": 1" +
-				"		}" +
-				"	}" +
-				"]";
-		StringEntity tmp = null;
-		try {
-			tmp = new StringEntity(data, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-
-		httpPut.setEntity(tmp);
-		HttpResponse response = null;
-		try {
-			response = httpClient.execute(httpPut, localContext);
-		} catch (ClientProtocolException e) {
-			
-			e.printStackTrace();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
-
-		try {
-			String result = EntityUtils.toString(response.getEntity());
-		} catch (ParseException e) {
-			
-			e.printStackTrace();
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-		}
-		
-
-	}
-
+	
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog;
 		switch(id){
