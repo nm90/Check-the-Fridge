@@ -1,0 +1,14 @@
+textAppearanceButton	     Text color, typeface, size, and style for the text inside of a button.
+textAppearance	              Default appearance of text: color, typeface, size, and style.
+textAppearanceLargePopupMenu  Text color, typeface, size, and style for the text inside of a popup menu.
+textAppearanceListItem        The preferred TextAppearance for the primary text of list items.
+theme	                      The overall theme to use for an activity.
+windowBackground	      Drawable to use as the overall window background.
+windowTitleBackgroundStyle    The style resource to use for a window's title area.
+windowTitleSize	              The style resource to use for a window's title bar height.
+windowTitleStyle	      The style resource to use for a window's title text.
+button	                      Drawable used for the button graphic (e.g.
+buttonStyle	              Normal Button style.
+buttonStyleInset	      Button style to inset into an EditText.
+buttonStyleSmall	      Small Button style.
+buttonStyleToggle	      ToggleButton style.

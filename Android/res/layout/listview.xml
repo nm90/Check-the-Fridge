@@ -3,7 +3,8 @@
     android:id="@+id/listview"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal" >
+    android:orientation="horizontal" 
+    style="@style/mainColorScheme">
 
     <TextView
         xmlns:android="http://schemas.android.com/apk/res/android"

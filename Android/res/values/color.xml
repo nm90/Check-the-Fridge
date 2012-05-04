@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Green Theme -->
+    <color name="DarkGreen">#006400</color>
+    <color name="Olive">#808000</color>
+    <color name="OliveDrab">#6B8E23</color>
+    <color name="GreenYellow">#ADFF2F</color>
+    <color name="LimeGreen">#32CD32</color>
+    
+    <!-- Primary Theme -->
+    <color name="Red">#FF0000</color>
+    <color name="Blue">#0000FF</color>
+    <color name="Green">#00FF00</color>
+    <color name="Purple">#FF00FF</color>
+    <color name="Ivory">#FFFFF0</color>
+    <color name="Aqua">#00FFFF</color>
+    
+    
+</resources>
