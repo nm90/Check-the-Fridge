@@ -14,7 +14,7 @@
         android:layout_marginBottom="141dp"
         android:text="WHATS IN"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/Red"
+        android:textColor="@color/OliveDrab"
         android:textSize="30sp" />
 
     <TextView
@@ -26,7 +26,7 @@
         android:layout_marginTop="36dp"
         android:text="THE FRIDGE"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/Red"
+        android:textColor="@color/OliveDrab"
         android:textSize="30sp" />
 
    "
