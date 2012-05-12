@@ -1,6 +1,7 @@
 package com.wiscomfort.fridgeapp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -15,7 +16,13 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.HeaderGroup;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.content.Context;
@@ -34,7 +41,17 @@ public class LoginToFridgeActivity extends FridgeActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//httpclient.setRedirectHandler(new DefaultRedirectHandler() { });
-		new DownloadBody().execute("http://ec2-23-20-255-144.compute-1.amazonaws.com/fridge/admin/");
+		String base_url = "http://ec2-23-20-255-144.compute-1.amazonaws.com/";
+		String login = base_url + "fridge/login/";
+		String search_fridge = base_url + "search/";
+		// TODO get this the query filter from user qr scan
+		search_fridge += "?q=SecondFridge";
+		
+		String[] urls = new String[2]; 
+		urls[0] = login;
+		urls[1] = search_fridge;
+		
+		new DownloadBody().execute(urls);
 
 	}
 
@@ -55,48 +72,45 @@ public class LoginToFridgeActivity extends FridgeActivity {
 		 * delivers it the parameters given to AsyncTask.execute() 
 		 * @return */
 		protected String doInBackground(String... urls) {
-			Header header = loadCookiesFromNetwork(urls[0]);
-			loadCookiesFromNetwork(urls[0]);
-			String result = loadFromNetwork(urls[0], header);
+			HttpClient httpclient = new DefaultHttpClient();
+			String csrftoken = getCsrfToken(httpclient, urls[0]);
+			String result = getItemsFromFridge(httpclient, urls[1], csrftoken);
 			return result;
 		}
 		
 		/*
 		 * Need to load the cookies before posting to django
 		 */
-		protected Header loadCookiesFromNetwork(String url){
+		protected String getCsrfToken(HttpClient httpclient, String url){
 
-			try {
-				HttpClient httpclient = new DefaultHttpClient();			
+			try {			
 				HttpGet httpget = new HttpGet(url);
 			
 			
 				HttpResponse response = httpclient.execute(httpget);
-				HttpEntity entity = response.getEntity();
-				if (response.containsHeader("Vary")){
-					return response.getFirstHeader("Vary");
-				}else{
-					return response.getFirstHeader("Vary");
+				HttpEntity entity = response.getEntity();				
+				
+				entity.isChunked();
+				String body = (EntityUtils.toString(entity));
+				String charset = (EntityUtils.getContentCharSet(entity));
+				Header header = entity.getContentType();
+				
+				JSONTokener jsontokener = new JSONTokener(body);
+				try {
+					JSONObject jsonobject = new JSONObject(jsontokener);
+					String retval = jsonobject.get("csrf_token").toString();
+					return retval;
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 				
-				/*
-				Header[] header = response.getAllHeaders();
-				for(int i = 0; i < header.length; i++){
-					String header_name = header[i].getName();
-					if(header_name.equals("Vary")){
-						return header[i];
-					}
-				}
-				return header[0];
-				*/
-				
-				
-				
+				return "#CHANGE_ME";
 			} catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				// TODO UnknownHost: launch dialog warning not logged in to wifi
 				e.printStackTrace();
 			}
 			return null;
@@ -105,43 +119,28 @@ public class LoginToFridgeActivity extends FridgeActivity {
 		/*
 		 * TODO Post to django with fridge auth code
 		 */
-		protected String loadFromNetwork(String url, Header getheaders){
+		protected String getItemsFromFridge(HttpClient httpclient, String url, String csrftoken){
 			String body = "";
 			String charset = null;
 
-			try {
-				HttpClient httpclient = new DefaultHttpClient();			
+			try {			
 				HttpGet httpget = new HttpGet(url);
 				
-				Header[] headers = {
-						new BasicHeader("owner_name", "neil"),
-						new BasicHeader("fridge_id", "neil")
-				};
-				
+				//httppost.addHeader("Cookie", "csrftoken="+csrftoken);
 				/*
-				Header[] headers = new Header[getheaders.length + extraheaders.length];
-				for(int i = 0; i < getheaders.length; i++){
-					headers[i] = getheaders[i];
-				}
-				*/
-				
-				/*
-				for(int i = getheaders.length, j=0; i < headers.length; i++,j++){
-					headers[i] = extraheaders[j];
-				}
-				*/
-				
-				httpget.setHeaders(headers);
-				httpget.addHeader(getheaders);
-				
+				HttpParams params = new BasicHttpParams();
+				params.setParameter("owner_name","neil");
+				params.setParameter("fridge_id","neil");
+				params.setParameter("csrfmiddlewaretoken", csrftoken);
 
+				httppost.setParams(params);
+				*/
 				HttpResponse response = httpclient.execute(httpget);
 				HttpEntity entity = response.getEntity();
 
 				body = (EntityUtils.toString(entity));
 				charset = (EntityUtils.getContentCharSet(entity));
 				Header header = entity.getContentType();
-				
 
 			} catch (ClientProtocolException e) {
 				// TODO Auto-generated catch block
