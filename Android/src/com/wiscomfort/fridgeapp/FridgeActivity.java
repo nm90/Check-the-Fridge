@@ -3,6 +3,9 @@ package com.wiscomfort.fridgeapp;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,6 +38,7 @@ public class FridgeActivity extends Activity {
 	protected static final int CONFLICT_IGNORE = 4;
 	protected static final int ADD_ITEM_DIALOG = 100;
 	private static final String TAG = "FridgeActivity";
+	protected static final int UPDATE_FRIDGE_REQUEST = 200;
 	private String debug = new String();
 	protected DataHelper dataHelper;
 	protected Cursor data;
@@ -47,7 +51,7 @@ public class FridgeActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		dataHelper = new DataHelper(this);
-				
+
 	}
 
 	/*
@@ -74,19 +78,40 @@ public class FridgeActivity extends Activity {
 			return true;
 
 		case R.id.show_inventory:
-			if(!this.getClass().equals(com.wiscomfort.fridgeapp.FridgeViewActivity.class)){
+			if(!this.getClass().equals(com.wiscomfort.fridgeapp.UpdateFridgeActivity.class)){
 				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
-						com.wiscomfort.fridgeapp.FridgeViewActivity.class);
+						com.wiscomfort.fridgeapp.UpdateFridgeActivity.class);
 
-				startActivity(i);
+				startActivityForResult(i, UPDATE_FRIDGE_REQUEST);
 			}
-			
+
 		default:
 			return super.onContextItemSelected(item);
 		}
 	}
+
 	
-	
+	protected void onActivityResult(int requestCode, int resultCode,
+			Intent data) {
+		if (requestCode == UPDATE_FRIDGE_REQUEST){
+			Bundle extras = data.getExtras();
+			//TODO update list of items using the json here
+			String json_string = (String) extras.get("json_items");
+			try {
+				JSONArray json_array = new JSONArray(json_string);
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			return;
+		}else{
+			return;
+		}
+
+	}
+
+
 	protected Dialog onCreateDialog(int id) {
 		Dialog dialog;
 		switch(id){
@@ -127,14 +152,14 @@ public class FridgeActivity extends Activity {
 		Button scan = (Button) dialog.findViewById(R.id.add_via_scan);
 		scan.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
-            	Intent i = new Intent("com.google.zxing.client.android.SCAN");
+				Intent i = new Intent("com.google.zxing.client.android.SCAN");
 
-            	startActivityForResult(i, 1);
-				
+				startActivityForResult(i, 1);
+
 				dialog.dismiss();
 			}
 		});
-		
+
 		Button submit = (Button) dialog.findViewById(R.id.submit_add);
 		submit.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
@@ -143,13 +168,13 @@ public class FridgeActivity extends Activity {
 					addItem(itemToAdd);
 				}
 				// empty EditText and close dialog window
-				
+
 				editItemName.setText("");			
 				dialog.dismiss();
 
 			}
-			
-			
+
+
 		});
 
 		debug = "addItemSubmit: " + submit.toString();
@@ -216,16 +241,16 @@ public class FridgeActivity extends Activity {
 		long itemId;
 
 		database = dataHelper.getWritableDatabase();
-				
+
 		updateItem.put("name", name);
-		
+
 		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, CONFLICT_IGNORE);
 
 		// requery to refresh listview to reflect db changes
 		data.requery();
 		selectedItem = name;
 		showDialog(UPDATE_ITEM_DIALOG);
-		}
+	}
 
 	/*
 	 * remove item with name from db
@@ -239,24 +264,24 @@ public class FridgeActivity extends Activity {
 		data.requery();
 		Log.v(TAG, "Item removed from db");
 	}
-	
+
 	/*
 	 * update item with count
 	 */
-	
+
 	protected void updateItem(String name, int count) {
 		//TODO FIX BUG. Updating local Android DB causes app to crash
 		ContentValues updateItem = new ContentValues();
 		database = dataHelper.getWritableDatabase();
-		
+
 		updateItem.put("name", name);
 		updateItem.put("amount", count);
-		
+
 		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, database.CONFLICT_IGNORE);
-		
+
 		// requery to refresh listview to reflect db changes
 		data.requery();
-		
+
 	}
 
 }
