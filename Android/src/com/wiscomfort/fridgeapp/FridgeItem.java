@@ -5,42 +5,26 @@ package com.wiscomfort.fridgeapp;
  */
 public class FridgeItem {
 
-		public String pk;
-		public String amount;
-		public String fridge;
+		private String name;
+		private int amount;
+		private int fridge_id;
 		
-		public FridgeItem(String pk, String amount, String fridge){
-			setPK(pk);
-			setAmount(amount);
-			setFridge(fridge);
-		}
-		
-		public void setPK(String pk){
-			this.pk = pk;
-		}
-		
-		public void setAmount(String amount){
+		public FridgeItem(String pk, int amount, int fridge){
+			this.name = pk;
 			this.amount = amount;
+			this.fridge_id = fridge;
 		}
 		
-		public void setFridge(String fridge){
-			this.fridge = fridge;
-		}
-		
-		public String getPK(){
-			return this.pk;
-		}
-		
-		public String getAmount(){
+		public int getAmount(){
 			return this.amount;
 		}
 		
-		public String getFridge(){
-			return this.fridge;
+		public int getFridgeID(){
+			return this.fridge_id;
 		}
 		
 		public String toString(){
-			return getPK() + ": " + getAmount() + " " + getFridge();
+			return "Item: " + name + ", amount: " + amount + ", fridge_id: " + fridge_id;
 		}
 		
 		
