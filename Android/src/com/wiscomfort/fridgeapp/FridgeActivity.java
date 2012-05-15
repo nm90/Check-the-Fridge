@@ -46,6 +46,8 @@ public class FridgeActivity extends Activity {
 	private static final String TAG = "FridgeActivity";
 	protected static final int UPDATE_FRIDGE_REQUEST = 200;
 	protected static final int SCAN_NEW_UPC_REQUEST = 300;
+	protected static final int SEARCH_FOR_UPC_REQUEST = 400;
+	protected static final String FLAG_FOR_UPDATE_UPC = "999999999";
 	private String debug = new String();
 	protected DataHelper dataHelper;
 	protected Cursor data;
@@ -119,7 +121,7 @@ public class FridgeActivity extends Activity {
 	 * Create items after looking through DjangoModel objects
 	 */
 	private ArrayList<FridgeItem> makeItemsFromModels(DjangoModel[] models) {
-		
+ 		
 		ArrayList<FridgeItem> items = new ArrayList<FridgeItem>();
 		
 		for(DjangoModel model : models){
@@ -170,14 +172,32 @@ public class FridgeActivity extends Activity {
 		}
 		else if (requestCode == SCAN_NEW_UPC_REQUEST){
 			if (data != null) {
-				String response = data.getAction();
-				if(Pattern.matches("[0-9]{1,13}", response)) {
-					addItem(data.getExtras().getString("name"), data.getExtras().getInt("count"), response);         
+				 String result = data.getStringExtra("SCAN_RESULT");
+				if(Pattern.matches("[0-9]{1,13}", result)) {
+					updateUPC(result);         
 				} 
 				else{
-					addItem(data.getExtras().getString("name"), data.getExtras().getInt("count"), "000000000");
+					updateUPC("000000000");
 				}
 				return;
+			}
+			else{
+				return;
+			}
+		}
+		else if (requestCode == SEARCH_FOR_UPC_REQUEST){
+			if (data != null) {
+				String result = data.getStringExtra("SCAN_RESULT");
+				
+				if(Pattern.matches("[0-9]{1,13}", result)) {
+					SQLiteDatabase database = dataHelper.getReadableDatabase();
+					String mySQL="SELECT * FROM " + DataHelper.SOURCE_TABLE_NAME + " WHERE UPC LIKE '"+ result + "'";
+					this.data = database.rawQuery( mySQL, null);
+					if(this.data.getCount() != 0){
+						this.data.moveToPosition(0);
+						updateItem(this.data.getString(this.data.getColumnIndex("name")), Integer.parseInt(this.data.getString(this.data.getColumnIndex("start_amount"))));
+					}
+				}
 			}
 			else{
 				return;
@@ -248,10 +268,13 @@ public class FridgeActivity extends Activity {
 		scan.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
 				Intent i = new Intent("com.google.zxing.client.android.SCAN");
-
-				startActivityForResult(i, 1);
-
-				dialog.dismiss();
+				i.putExtra("SCAN_MODE", "PRODUCT_MODE");
+				startActivityForResult(i, SEARCH_FOR_UPC_REQUEST);
+					scanNewUPC.setChecked(false);
+					editItemName.setText("name");
+					editItemCount.setText("count");
+					dialog.dismiss();
+					//TODO not sure how to attach the UPC, needs to be an update not an add.
 			}
 		});
 
@@ -268,9 +291,10 @@ public class FridgeActivity extends Activity {
 				}
 				if (!itemToAdd.isEmpty() && countToAdd > 0) { 
 					if(scanNewUPC.isChecked()){
+						addItem(itemToAdd, countToAdd, FLAG_FOR_UPDATE_UPC);
+						selectedItem = itemToAdd;
 						Intent i = new Intent("com.google.zxing.client.android.SCAN");
-						i.putExtra("name", itemToAdd);
-						i.putExtra("count", countToAdd);
+						i.putExtra("SCAN_MODE", "PRODUCT_MODE");
 						startActivityForResult(i, SCAN_NEW_UPC_REQUEST);
 					}
 					else{
@@ -279,7 +303,8 @@ public class FridgeActivity extends Activity {
 				}
 				// empty EditText and close dialog window
 
-				editItemName.setText("");			
+				editItemName.setText("Name");	
+				editItemCount.setText("Count");
 				dialog.dismiss();
 
 			}
@@ -379,6 +404,19 @@ public class FridgeActivity extends Activity {
 		Log.v(TAG, "Item removed from db");
 	}
 
+	
+	protected void updateUPC(String UPC){
+		ContentValues updateItem = new ContentValues();
+		database = dataHelper.getWritableDatabase();
+		String mySQL="SELECT * FROM " + DataHelper.SOURCE_TABLE_NAME + " WHERE UPC LIKE '"+ FLAG_FOR_UPDATE_UPC + "'";
+		this.data = database.rawQuery(mySQL, null);
+		this.data.moveToPosition(0);
+		updateItem.put("UPC", UPC);
+		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, database.CONFLICT_IGNORE);
+
+		// requery to refresh listview to reflect db changes
+		data.requery();
+	}
 	
 	/*
 	 * update item with count
