@@ -54,7 +54,7 @@ public class FridgeViewActivity extends FridgeActivity {
 		}
 
 		// order the list by the first displayed column
-		data = database.query(DataHelper.SOURCE_TABLE_NAME, columns, null, null, null, null, null);
+		data = database.rawQuery("select * from " + DataHelper.SOURCE_TABLE_NAME + " where amount > 0", null);
 		
 		dataSource = new SimpleCursorAdapter(this,
 				R.layout.listview, data, columns,

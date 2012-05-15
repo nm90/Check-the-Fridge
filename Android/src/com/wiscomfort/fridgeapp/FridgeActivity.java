@@ -2,9 +2,11 @@ package com.wiscomfort.fridgeapp;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 
 import android.app.Activity;
@@ -25,6 +27,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
@@ -39,6 +42,7 @@ public class FridgeActivity extends Activity {
 	protected static final int ADD_ITEM_DIALOG = 100;
 	private static final String TAG = "FridgeActivity";
 	protected static final int UPDATE_FRIDGE_REQUEST = 200;
+	protected static final int SCAN_NEW_UPC_REQUEST = 300;
 	private String debug = new String();
 	protected DataHelper dataHelper;
 	protected Cursor data;
@@ -90,7 +94,7 @@ public class FridgeActivity extends Activity {
 		}
 	}
 
-	
+
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
 		if (requestCode == UPDATE_FRIDGE_REQUEST){
@@ -110,7 +114,7 @@ public class FridgeActivity extends Activity {
 					jsonName = informationArray[1].replace("\"", "");
 					informationArray = jsonAmount.split(":");
 					jsonAmount = informationArray[2];
-					addItem(jsonName);
+					addItem(jsonName, Integer.parseInt(jsonAmount), "000000000" );
 					updateItem(jsonName, Integer.parseInt(jsonAmount));
 					i++;
 				}
@@ -118,12 +122,27 @@ public class FridgeActivity extends Activity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			
-			return;
-		}else{
+
 			return;
 		}
-
+		else if (requestCode == SCAN_NEW_UPC_REQUEST){
+			if (data != null) {
+				String response = data.getAction();
+				if(Pattern.matches("[0-9]{1,13}", response)) {
+					addItem(data.getExtras().getString("name"), data.getExtras().getInt("count"), response);         
+				} 
+				else{
+					addItem(data.getExtras().getString("name"), data.getExtras().getInt("count"), "000000000");
+				}
+				return;
+			}
+			else{
+				return;
+			}
+		}
+		else {
+			return;
+		}
 	}
 
 
@@ -160,9 +179,23 @@ public class FridgeActivity extends Activity {
 		image.setImageResource(R.drawable.ic_launcher);
 
 		final EditText editItemName = (EditText) dialog.findViewById(R.id.add_item_name);
+		editItemName.setOnClickListener( new OnClickListener() {
+			public void onClick(View v){
+				editItemName.setText("");
+			}
+		});
+
+		final EditText editItemCount = (EditText) dialog.findViewById(R.id.add_item_count);
+		editItemCount.setOnClickListener( new OnClickListener() {
+			public void onClick(View v){
+				editItemCount.setText("");
+			}
+		});
 
 		debug = "text: " + text.toString();
 		Log.d(TAG, debug);
+
+		final CheckBox scanNewUPC =  (CheckBox) dialog.findViewById(R.id.scan_barcode_on_add);
 
 		Button scan = (Button) dialog.findViewById(R.id.add_via_scan);
 		scan.setOnClickListener( new OnClickListener() {
@@ -179,8 +212,23 @@ public class FridgeActivity extends Activity {
 		submit.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
 				String itemToAdd = editItemName.getText().toString();
-				if (!itemToAdd.isEmpty()) { 
-					addItem(itemToAdd);
+				int countToAdd = -1;
+				try{
+					countToAdd = Integer.parseInt(editItemCount.getText().toString());
+				}catch(NumberFormatException e){
+					e.printStackTrace();
+					//TODO handle this failure better
+				}
+				if (!itemToAdd.isEmpty() && countToAdd > 0) { 
+					if(scanNewUPC.isChecked()){
+						Intent i = new Intent("com.google.zxing.client.android.SCAN");
+						i.putExtra("name", itemToAdd);
+						i.putExtra("count", countToAdd);
+						startActivityForResult(i, SCAN_NEW_UPC_REQUEST);
+					}
+					else{
+						addItem(itemToAdd, countToAdd, "000000000");
+					}
 				}
 				// empty EditText and close dialog window
 
@@ -250,7 +298,7 @@ public class FridgeActivity extends Activity {
 	/*
 	 * Add item with name to db 
 	 */
-	protected void addItem(String name) {
+	protected void addItem(String name, int amount, String UPC) {
 
 		ContentValues updateItem = new ContentValues();
 		long itemId;
@@ -258,8 +306,11 @@ public class FridgeActivity extends Activity {
 		database = dataHelper.getWritableDatabase();
 
 		updateItem.put("name", name);
+		updateItem.put("amount", amount);
+		updateItem.put("start_amount", amount);
+		updateItem.put("UPC", UPC);
 
-		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, CONFLICT_IGNORE);
+		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, database.CONFLICT_IGNORE);
 
 		// requery to refresh listview to reflect db changes
 		data.requery();

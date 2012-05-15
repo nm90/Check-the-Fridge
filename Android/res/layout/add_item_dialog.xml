@@ -20,13 +20,6 @@
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
             android:layout_marginRight="10dp" />
-        
-        <Button
-            android:id="@+id/add_via_scan"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/add_scan" />
-        
     </LinearLayout>
 
     <LinearLayout
@@ -46,13 +39,31 @@
         <EditText
             android:id="@+id/add_item_name"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="Name" />
+        <EditText
+            android:id="@+id/add_item_count"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+			android:text="Count"/>
 
         <Button
             android:id="@+id/submit_add"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/submit_add" />
+                      
+        <Button
+            android:id="@+id/add_via_scan"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_scan" />
+        
+        <CheckBox
+            android:id="@+id/scan_barcode_on_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scan Barcode on Add" />
     </LinearLayout>
 
 </LinearLayout>

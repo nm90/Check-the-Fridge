@@ -23,8 +23,9 @@ public class DataHelper extends SQLiteOpenHelper {
     					BaseColumns._ID +
     						" INTEGER PRIMARY KEY AUTOINCREMENT,	"+
     					"name VARCHAR,								"+
-    					"amount INTEGER,                             "+
-    					"type VARCHAR,								"+
+    					"amount INTEGER,                            "+
+    					"start_amount INTEGER,                      "+
+    					"UPC VARCHAR,								"+
     					"UNIQUE(name)								"+
     			")										";			
 	    
