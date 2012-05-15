@@ -99,6 +99,21 @@ public class FridgeActivity extends Activity {
 			String json_string = (String) extras.get("json_items");
 			try {
 				JSONArray json_array = new JSONArray(json_string);
+				int i = 0;
+				String informationArray[];
+				String jsonName;
+				String jsonAmount;
+				while(!json_array.get(i).equals(null)){
+					informationArray = json_array.getString(i).split(",");
+					jsonAmount = informationArray[2];
+					informationArray = informationArray[1].split(":");
+					jsonName = informationArray[1].replace("\"", "");
+					informationArray = jsonAmount.split(":");
+					jsonAmount = informationArray[2];
+					addItem(jsonName);
+					updateItem(jsonName, Integer.parseInt(jsonAmount));
+					i++;
+				}
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -112,7 +127,7 @@ public class FridgeActivity extends Activity {
 	}
 
 
-	protected Dialog onCreateDialog(int id) {
+	protected Dialog onCreateDialog(int id){
 		Dialog dialog;
 		switch(id){
 		case ADD_ITEM_DIALOG:
@@ -248,8 +263,6 @@ public class FridgeActivity extends Activity {
 
 		// requery to refresh listview to reflect db changes
 		data.requery();
-		selectedItem = name;
-		showDialog(UPDATE_ITEM_DIALOG);
 	}
 
 	/*
