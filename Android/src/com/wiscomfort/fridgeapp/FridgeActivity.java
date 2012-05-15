@@ -2,6 +2,7 @@ package com.wiscomfort.fridgeapp;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 import org.json.JSONArray;
@@ -100,7 +101,7 @@ public class FridgeActivity extends Activity {
 	/*
 	 * Create DjangoModel objects in java from json from server
 	 */
-	private DjangoModel[] parseJsonModels(String json_items){
+	private DjangoModel[] parseJsonModels(String json_items) {
 		// Use JSONStringer to move json models to java objects
 		// for every item in the fridge, create java object from json
 		Gson gson = new Gson();
@@ -110,6 +111,24 @@ public class FridgeActivity extends Activity {
 		//String json = gson.toJson(models);
 		//System.out.println(json);
 	}
+	
+	
+	/*
+	 * Create items after looking through DjangoModel objects
+	 */
+	private ArrayList<FridgeItem> makeItemsFromModels(DjangoModel[] models) {
+		
+		ArrayList<FridgeItem> items = new ArrayList<FridgeItem>();
+		
+		for(DjangoModel model : models){
+			if(model.isItem()){
+				// make model into Item
+			}
+		}
+		
+		return items;
+	}
+	
 	
 	
 	/*
