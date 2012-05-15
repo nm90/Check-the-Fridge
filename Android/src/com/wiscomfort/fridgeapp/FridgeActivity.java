@@ -94,7 +94,37 @@ public class FridgeActivity extends Activity {
 		}
 	}
 
+	
+	/*
+	 * Create DjangoModel objects in java from json from server
+	 */
+	private DjangoModel[] parseJsonModels(String json_items){
+		// Use JSONStringer to move json models to java objects
+		// for every item in the fridge, create java object from json
+		Gson gson = new Gson();
 
+		DjangoModel[] models = gson.fromJson(json_items, DjangoModel[].class);
+		return models;
+		//String json = gson.toJson(models);
+		//System.out.println(json);
+	}
+	
+	
+	/*
+	 *
+	 */
+	protected void onActivityResult(int requestCode, int resultCode,
+			Intent data) {
+		if (requestCode == UPDATE_FRIDGE_REQUEST){
+			Bundle extras = data.getExtras();
+			//TODO update list of items using the json here
+			String json_string = (String) extras.get("json_items");
+			DjangoModel[] models = parseJsonModels(json_string);
+	
+	
+	/*
+	 *
+	 */
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
 		if (requestCode == UPDATE_FRIDGE_REQUEST){
