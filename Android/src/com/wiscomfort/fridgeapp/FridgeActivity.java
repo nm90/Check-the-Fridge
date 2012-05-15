@@ -61,6 +61,7 @@ public class FridgeActivity extends Activity {
 
 	}
 
+	
 	/*
 	 * Set xml for menu
 	 */
@@ -71,6 +72,7 @@ public class FridgeActivity extends Activity {
 		return true;
 	}
 
+	
 	/*
 	 * Set items in menu and resulting actions
 	 */
@@ -128,8 +130,7 @@ public class FridgeActivity extends Activity {
 		
 		return items;
 	}
-	
-	
+		
 	
 	/*
 	 *
@@ -187,7 +188,10 @@ public class FridgeActivity extends Activity {
 		}
 	}
 
-
+	
+	/*
+	 * 
+	 */
 	protected Dialog onCreateDialog(int id){
 		Dialog dialog;
 		switch(id){
@@ -205,6 +209,7 @@ public class FridgeActivity extends Activity {
 		return dialog;
 	}
 
+	
 	/*
 	 * Here's where we actually build the AddDialog
 	 */
@@ -288,6 +293,7 @@ public class FridgeActivity extends Activity {
 		return dialog;
 	}
 
+	
 	/*
 	 * Here's where we actually build the UpdateDialog
 	 */
@@ -337,6 +343,7 @@ public class FridgeActivity extends Activity {
 		return dialog;
 	}
 
+	
 	/*
 	 * Add item with name to db 
 	 */
@@ -358,6 +365,7 @@ public class FridgeActivity extends Activity {
 		data.requery();
 	}
 
+	
 	/*
 	 * remove item with name from db
 	 */
@@ -371,10 +379,10 @@ public class FridgeActivity extends Activity {
 		Log.v(TAG, "Item removed from db");
 	}
 
+	
 	/*
 	 * update item with count
 	 */
-
 	protected void updateItem(String name, int count) {
 		//TODO FIX BUG. Updating local Android DB causes app to crash
 		ContentValues updateItem = new ContentValues();
@@ -387,7 +395,7 @@ public class FridgeActivity extends Activity {
 
 		// requery to refresh listview to reflect db changes
 		data.requery();
-
+		
 	}
 
 }
