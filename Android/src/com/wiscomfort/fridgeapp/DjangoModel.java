@@ -5,9 +5,9 @@ import java.util.ArrayList;
 
 public class DjangoModel {
 
-	String pk;
-	String model;
-	Fields fields;
+	private String pk;
+	private String model;
+	private Fields fields;
 	
 	@Override
 	public String toString(){
@@ -26,8 +26,8 @@ public class DjangoModel {
 
 class Fields {
 
-	int amount;
-	int fridge;
+	private int amount;
+	private int fridge;
 	
 	@Override
 	public String toString(){
