@@ -141,6 +141,8 @@ public class FridgeActivity extends Activity {
 			//TODO update list of items using the json here
 			String json_string = (String) extras.get("json_items");
 			DjangoModel[] models = parseJsonModels(json_string);
+			
+			// TODO This is where we should update the FridgeView
 			try {
 				JSONArray json_array = new JSONArray(json_string);
 				int i = 0;
