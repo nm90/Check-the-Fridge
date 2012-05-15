@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.gson.Gson;
+
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -120,17 +122,6 @@ public class FridgeActivity extends Activity {
 			//TODO update list of items using the json here
 			String json_string = (String) extras.get("json_items");
 			DjangoModel[] models = parseJsonModels(json_string);
-	
-	
-	/*
-	 *
-	 */
-	protected void onActivityResult(int requestCode, int resultCode,
-			Intent data) {
-		if (requestCode == UPDATE_FRIDGE_REQUEST){
-			Bundle extras = data.getExtras();
-			//TODO update list of items using the json here
-			String json_string = (String) extras.get("json_items");
 			try {
 				JSONArray json_array = new JSONArray(json_string);
 				int i = 0;
