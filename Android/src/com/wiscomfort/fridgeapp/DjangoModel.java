@@ -13,6 +13,15 @@ public class DjangoModel {
 	public String toString(){
 		return "pk: " + pk + ", fields: " + fields.toString();
 	}
+	
+	public boolean isItem(){
+		if(this.model.equals("fridge.item")){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
 }
 
 class Fields {
