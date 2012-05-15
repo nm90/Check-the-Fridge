@@ -40,14 +40,17 @@ import android.widget.Toast;
 
 public class FridgeActivity extends Activity {
 
-	protected static final int UPDATE_ITEM_DIALOG = 101;
 	protected static final int CONFLICT_IGNORE = 4;
 	protected static final int ADD_ITEM_DIALOG = 100;
+	protected static final int UPDATE_ITEM_DIALOG = 101;
 	private static final String TAG = "FridgeActivity";
 	protected static final int UPDATE_FRIDGE_REQUEST = 200;
-	protected static final int SCAN_NEW_UPC_REQUEST = 300;
-	protected static final int SEARCH_FOR_UPC_REQUEST = 400;
+	protected static final int SEARCH_FRIDGE_REQUEST = 201;
+	protected static final int ZXING_SCAN_FROM_ADD = 300;
+	protected static final int ZXING_SCAN_DIRECT = 301;
+	private static final int WEB_SCAN_RESULT = 400;
 	protected static final String FLAG_FOR_UPDATE_UPC = "999999999";
+	
 	private String debug = new String();
 	protected DataHelper dataHelper;
 	protected Cursor data;
@@ -89,9 +92,9 @@ public class FridgeActivity extends Activity {
 			return true;
 
 		case R.id.show_inventory:
-			if(!this.getClass().equals(com.wiscomfort.fridgeapp.UpdateFridgeActivity.class)){
+			if(!this.getClass().equals(com.wiscomfort.fridgeapp.WebDBActivity.class)){
 				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
-						com.wiscomfort.fridgeapp.UpdateFridgeActivity.class);
+						com.wiscomfort.fridgeapp.WebDBActivity.class);
 
 				startActivityForResult(i, UPDATE_FRIDGE_REQUEST);
 			}
@@ -170,10 +173,11 @@ public class FridgeActivity extends Activity {
 
 			return;
 		}
-		else if (requestCode == SCAN_NEW_UPC_REQUEST){
+		else if (requestCode == ZXING_SCAN_FROM_ADD){
 			if (data != null) {
 				 String result = data.getStringExtra("SCAN_RESULT");
 				if(Pattern.matches("[0-9]{1,13}", result)) {
+					//send update request
 					updateUPC(result);         
 				} 
 				else{
@@ -185,7 +189,16 @@ public class FridgeActivity extends Activity {
 				return;
 			}
 		}
-		else if (requestCode == SEARCH_FOR_UPC_REQUEST){
+		else if (requestCode == ZXING_SCAN_DIRECT){
+			
+			// This is where we want to try and add UPC to webserver
+			String upc = data.getStringExtra("SCAN_RESULT");
+			if(Pattern.matches("[0-9]{1,13}", upc)) {
+				// launch webactivity add upc to extras
+				
+			}
+			// TODO searching local database doesn't work currently
+			/*
 			if (data != null) {
 				String result = data.getStringExtra("SCAN_RESULT");
 				
@@ -201,7 +214,10 @@ public class FridgeActivity extends Activity {
 			}
 			else{
 				return;
-			}
+			}*/
+		}
+		else if(requestCode == WEB_SCAN_RESULT){
+			
 		}
 		else {
 			return;
@@ -269,7 +285,7 @@ public class FridgeActivity extends Activity {
 			public void onClick(View v){
 				Intent i = new Intent("com.google.zxing.client.android.SCAN");
 				i.putExtra("SCAN_MODE", "PRODUCT_MODE");
-				startActivityForResult(i, SEARCH_FOR_UPC_REQUEST);
+				startActivityForResult(i, ZXING_SCAN_DIRECT);
 					scanNewUPC.setChecked(false);
 					editItemName.setText("name");
 					editItemCount.setText("count");
@@ -295,7 +311,7 @@ public class FridgeActivity extends Activity {
 						selectedItem = itemToAdd;
 						Intent i = new Intent("com.google.zxing.client.android.SCAN");
 						i.putExtra("SCAN_MODE", "PRODUCT_MODE");
-						startActivityForResult(i, SCAN_NEW_UPC_REQUEST);
+						startActivityForResult(i, ZXING_SCAN_FROM_ADD);
 					}
 					else{
 						addItem(itemToAdd, countToAdd, "000000000");
