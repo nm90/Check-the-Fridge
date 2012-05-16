@@ -24,7 +24,7 @@ public class FridgeItem {
 			this.amount = model.getFields().getAmount();
 			this.inital_amount = model.getFields().getInintal_amount();
 			this.fridge_id = model.getFields().getFridge();
-			this.UPC = UPC;
+			this.UPC = model.getFields().getUPC();
 		}
 		
 		public String getUPC(){
