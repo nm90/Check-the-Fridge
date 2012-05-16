@@ -24,6 +24,7 @@ public class WebDBActivity extends Activity {
 	private static final String TAG = "LoginToFridge";
 	protected static final int UPDATE_FRIDGE_REQUEST = FridgeActivity.UPDATE_FRIDGE_REQUEST;
 	protected static final int SEARCH_FRIDGE_REQUEST = FridgeActivity.SEARCH_FRIDGE_REQUEST;
+	protected static final int WEB_SCAN_RESULT = FridgeActivity.WEB_SCAN_RESULT;
 	private static final int nITEMS_FROM_FRIDGE = 0;
 	private static final int nSEARCH_FOR_UPC = 1;
 	private String response;
@@ -38,12 +39,15 @@ public class WebDBActivity extends Activity {
 		String base_url = "http://ec2-23-20-255-144.compute-1.amazonaws.com/fridge/";
 		String login = base_url + "login/";
 		String search_fridge = base_url + "search/";
-		String search_upc = base_url + "search-upc/";
+		String search_upc = base_url + "search-upc/?q=";
 		
 		// TODO get this the query filter from user qr scan
 		//urls[nITEMS_FROM_FRIDGE] = search_fridge;
 		
+		
+		
 		Intent intent = this.getIntent();
+		int flags = intent.getFlags();
 		intent.getAction();
 		
 		Bundle extras = null;
@@ -61,7 +65,6 @@ public class WebDBActivity extends Activity {
 				
 				search_upc += upc_from_intent;
 				urls[nSEARCH_FOR_UPC] = search_upc;
-				
 			}else{
 				//TODO return failure	
 			}
@@ -69,7 +72,7 @@ public class WebDBActivity extends Activity {
 			//TODO return failure
 		}
 		
-		int flags = intent.getFlags();
+		
 		
 		new DownloadJsonItems().execute(urls);
 
