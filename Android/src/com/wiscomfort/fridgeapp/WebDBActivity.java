@@ -25,6 +25,7 @@ public class WebDBActivity extends Activity {
 	protected static final int UPDATE_FRIDGE_REQUEST = FridgeActivity.UPDATE_FRIDGE_REQUEST;
 	protected static final int SEARCH_FRIDGE_REQUEST = FridgeActivity.SEARCH_FRIDGE_REQUEST;
 	private static final int nITEMS_FROM_FRIDGE = 0;
+	private static final int nSEARCH_FOR_UPC = 1;
 	private String response;
 	private String upc_from_intent;
 	/** Called when the activity is first created. */
@@ -34,14 +35,13 @@ public class WebDBActivity extends Activity {
 		//httpclient.setRedirectHandler(new DefaultRedirectHandler() { });
 		String[] urls = new String[2];
 		
-		String base_url = "http://ec2-23-20-255-144.compute-1.amazonaws.com/";
-		String login = base_url + "fridge/login/";
+		String base_url = "http://ec2-23-20-255-144.compute-1.amazonaws.com/fridge/";
+		String login = base_url + "login/";
 		String search_fridge = base_url + "search/";
+		String search_upc = base_url + "search-upc/";
 		
 		// TODO get this the query filter from user qr scan
-		search_fridge += "?q=Bassett";
-		
-		urls[nITEMS_FROM_FRIDGE] = search_fridge;
+		//urls[nITEMS_FROM_FRIDGE] = search_fridge;
 		
 		Intent intent = this.getIntent();
 		intent.getAction();
@@ -55,6 +55,13 @@ public class WebDBActivity extends Activity {
 		if(extras != null){
 			if(extras.containsKey("upc")){
 				upc_from_intent = (String)extras.get("upc");
+				if(extras.containsKey("name") && extras.containsKey("initial_amount")){
+					// TODO need to set a flag here
+				}
+				
+				search_upc += upc_from_intent;
+				urls[nSEARCH_FOR_UPC] = search_upc;
+				
 			}else{
 				//TODO return failure	
 			}
@@ -63,8 +70,6 @@ public class WebDBActivity extends Activity {
 		}
 		
 		int flags = intent.getFlags();
-		
-		 
 		
 		new DownloadJsonItems().execute(urls);
 
@@ -93,8 +98,16 @@ public class WebDBActivity extends Activity {
 		 * @return */
 		protected String doInBackground(String... urls) {
 			HttpClient httpclient = new DefaultHttpClient();
-
-			JSONArray result = getItemsFromFridge(httpclient, urls[nITEMS_FROM_FRIDGE]);
+			JSONArray result = null;
+			
+			if( urls[nITEMS_FROM_FRIDGE] != null ){
+				result = searchFridge(httpclient, urls[nITEMS_FROM_FRIDGE]);	
+			}
+			if( urls[nSEARCH_FOR_UPC] != null ){
+				result = searchFridge(httpclient, urls[nSEARCH_FOR_UPC]);	
+			}
+			
+			
 			try {
 				return result.toString(0);
 			} catch (JSONException e) {
@@ -104,51 +117,11 @@ public class WebDBActivity extends Activity {
 			return null;
 		}
 		
-		
-		/*
-		 * Need to load the cookies before posting to django
-		 */
-		/**
-		protected String getCsrfToken(HttpClient httpclient, String url){
 
-			try {			
-				HttpGet httpget = new HttpGet(url);
-			
-			
-				HttpResponse response = httpclient.execute(httpget);
-				HttpEntity entity = response.getEntity();				
-				
-				entity.isChunked();
-				String body = (EntityUtils.toString(entity));
-				String charset = (EntityUtils.getContentCharSet(entity));
-				Header header = entity.getContentType();
-				
-				JSONTokener jsontokener = new JSONTokener(body);
-				try {
-					JSONObject jsonobject = new JSONObject(jsontokener);
-					String retval = jsonobject.get("csrf_token").toString();
-					return retval;
-				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-				return "#CHANGE_ME";
-			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO UnknownHost: launch dialog warning not logged in to wifi
-				e.printStackTrace();
-			}
-			return "#CHANGE_ME";
-		}
-		*/
-		
 		/*
 		 * TODO Post to django with fridge auth code
 		 */
-		protected JSONArray getItemsFromFridge(HttpClient httpclient, String url){
+		protected JSONArray searchFridge(HttpClient httpclient, String url){
 			String body = "";
 			String charset = null;
 
