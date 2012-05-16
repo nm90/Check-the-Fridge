@@ -58,5 +58,10 @@ public class FridgeItem {
 		public String getInitAmountString() {
 			return "" + this.amount;
 		}
+
+		public String getFridgeIDString() {
+			// TODO Auto-generated method stub
+			return "" + this.fridge_id;
+		}
 		
 }
