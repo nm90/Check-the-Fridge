@@ -117,7 +117,7 @@ public class FridgeActivity extends Activity {
 		DjangoModel[] models = gson.fromJson(json_items, DjangoModel[].class);
 		return models;
 		//String json = gson.toJson(models);
-		//System.out.println(json);
+		//System.out.println(json);	
 	}
 
 
@@ -143,6 +143,7 @@ public class FridgeActivity extends Activity {
 	 */
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
 		if (requestCode == UPDATE_FRIDGE_REQUEST){
 			Bundle extras = data.getExtras();
 			//TODO update list of items using the json here
@@ -196,9 +197,10 @@ public class FridgeActivity extends Activity {
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
 				// launch webactivity add upc to extras
-				Intent i = new Intent("com.wiscomfort.fridgeapp.WebDBActivity");
-				//i.putExtra("upc", upc);
-				i.putExtra("upc", 000000000);
+				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+						com.wiscomfort.fridgeapp.WebDBActivity.class);
+				i.putExtra("upc", upc);
+				//i.putExtra("upc", "000000000");
 				startActivityForResult(i, WEB_SCAN_RESULT);
 			}
 			// TODO searching local database doesn't work currently
