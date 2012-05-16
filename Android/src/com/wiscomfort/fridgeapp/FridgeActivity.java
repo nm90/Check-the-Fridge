@@ -50,7 +50,7 @@ public class FridgeActivity extends Activity {
 	protected static final int ZXING_SCAN_DIRECT = 301;
 	private static final int WEB_SCAN_RESULT = 400;
 	protected static final String FLAG_FOR_UPDATE_UPC = "999999999";
-	
+
 	private String debug = new String();
 	protected DataHelper dataHelper;
 	protected Cursor data;
@@ -67,7 +67,7 @@ public class FridgeActivity extends Activity {
 
 	}
 
-	
+
 	/*
 	 * Set xml for menu
 	 */
@@ -78,7 +78,7 @@ public class FridgeActivity extends Activity {
 		return true;
 	}
 
-	
+
 	/*
 	 * Set items in menu and resulting actions
 	 */
@@ -105,7 +105,7 @@ public class FridgeActivity extends Activity {
 		}
 	}
 
-	
+
 	/*
 	 * Create DjangoModel objects in java from json from server
 	 */
@@ -119,25 +119,25 @@ public class FridgeActivity extends Activity {
 		//String json = gson.toJson(models);
 		//System.out.println(json);
 	}
-	
-	
+
+
 	/*
 	 * Create items after looking through DjangoModel objects
 	 */
 	private ArrayList<FridgeItem> makeItemsFromModels(DjangoModel[] models) {
- 		
+
 		ArrayList<FridgeItem> items = new ArrayList<FridgeItem>();
-		
+
 		for(DjangoModel model : models){
 			if(model.isItem()){
 				items.add(new FridgeItem(model));
 			}
 		}
-		
+
 		return items;
 	}
-		
-	
+
+
 	/*
 	 *
 	 */
@@ -148,7 +148,7 @@ public class FridgeActivity extends Activity {
 			//TODO update list of items using the json here
 			String json_string = (String) extras.get("json_items");
 			DjangoModel[] models = parseJsonModels(json_string);
-			
+
 			// TODO This is where we should update the FridgeView
 			try {
 				JSONArray json_array = new JSONArray(json_string);
@@ -176,7 +176,7 @@ public class FridgeActivity extends Activity {
 		}
 		else if (requestCode == ZXING_SCAN_FROM_ADD){
 			if (data != null) {
-				 String result = data.getStringExtra("SCAN_RESULT");
+				String result = data.getStringExtra("SCAN_RESULT");
 				if(Pattern.matches("[0-9]{1,13}", result)) {
 					//send update request
 					updateUPC(result);         
@@ -191,20 +191,21 @@ public class FridgeActivity extends Activity {
 			}
 		}
 		else if (requestCode == ZXING_SCAN_DIRECT){
-			
+
 			// This is where we want to try and add UPC to webserver
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
 				// launch webactivity add upc to extras
-				Intent i = new Intent("com.wiscomfort.fridgeapp.UpdateFridgeActivity");
-				i.putExtra("upc", upc);
+				Intent i = new Intent("com.wiscomfort.fridgeapp.WebDBActivity");
+				//i.putExtra("upc", upc);
+				i.putExtra("upc", 000000000);
 				startActivityForResult(i, WEB_SCAN_RESULT);
 			}
 			// TODO searching local database doesn't work currently
 			/*
 			if (data != null) {
 				String result = data.getStringExtra("SCAN_RESULT");
-				
+
 				if(Pattern.matches("[0-9]{1,13}", result)) {
 					SQLiteDatabase database = dataHelper.getReadableDatabase();
 					String mySQL="SELECT * FROM " + DataHelper.SOURCE_TABLE_NAME + " WHERE UPC LIKE '"+ result + "'";
@@ -229,7 +230,7 @@ public class FridgeActivity extends Activity {
 		}
 	}
 
-	
+
 	/*
 	 * 
 	 */
@@ -250,7 +251,7 @@ public class FridgeActivity extends Activity {
 		return dialog;
 	}
 
-	
+
 	/*
 	 * Here's where we actually build the AddDialog
 	 */
@@ -291,19 +292,8 @@ public class FridgeActivity extends Activity {
 				Intent i = new Intent("com.google.zxing.client.android.SCAN");
 				i.putExtra("SCAN_MODE", "PRODUCT_MODE");
 				startActivityForResult(i, ZXING_SCAN_DIRECT);
-				if(!FridgeActivity.items.isEmpty()){
-					editItemName.setText(FridgeActivity.items.get(0).getName());
-					editItemCount.setText(FridgeActivity.items.get(0).getAmount());
-					scanNewUPC.setChecked(false);
-				}
-				else{
-					editItemName.setText("Name");
-					editItemCount.setText("Count");
-					dialog.dismiss();
-					Toast.makeText(getApplicationContext(), "That Beer is not in the DataBase Add it!", Toast.LENGTH_SHORT).show();
-				}
-
 			}
+
 		});
 
 		Button submit = (Button) dialog.findViewById(R.id.submit_add);
@@ -324,7 +314,7 @@ public class FridgeActivity extends Activity {
 						Intent i = new Intent("com.google.zxing.client.android.SCAN");
 						i.putExtra("SCAN_MODE", "PRODUCT_MODE");
 						startActivityForResult(i, ZXING_SCAN_FROM_ADD);
-						
+
 					}
 					else{
 						addItem(itemToAdd, countToAdd, "000000000");
@@ -347,13 +337,31 @@ public class FridgeActivity extends Activity {
 
 		});
 
+		/*public void onScanResultListener() {
+			if(!FridgeActivity.items.isEmpty()){
+				editItemName.setText(FridgeActivity.items.get(0).getName());
+				editItemCount.setText(FridgeActivity.items.get(0).getAmount());
+				scanNewUPC.setChecked(false);
+			}
+			else{
+				editItemName.setText("Name");
+				editItemCount.setText("Count");
+				dialog.dismiss();
+				Toast.makeText(getApplicationContext(), "That Beer is not in the DataBase Add it!", Toast.LENGTH_SHORT).show();
+			}
+			return;
+		}*/
+		
 		debug = "addItemSubmit: " + submit.toString();
 		Log.d(TAG, debug);
 
 		return dialog;
 	}
-
 	
+	
+	
+
+
 	/*
 	 * Here's where we actually build the UpdateDialog
 	 */
@@ -400,7 +408,7 @@ public class FridgeActivity extends Activity {
 		return dialog;
 	}
 
-	
+
 	/*
 	 * Add item with name to db 
 	 */
@@ -422,7 +430,7 @@ public class FridgeActivity extends Activity {
 		data.requery();
 	}
 
-	
+
 	/*
 	 * remove item with name from db
 	 */
@@ -436,7 +444,7 @@ public class FridgeActivity extends Activity {
 		Log.v(TAG, "Item removed from db");
 	}
 
-	
+
 	protected void updateUPC(String UPC){
 		//TODO Have to update the qurey the server for item with FLAG UPC, then replace it with UPC passed
 		ContentValues updateItem = new ContentValues();
@@ -450,12 +458,12 @@ public class FridgeActivity extends Activity {
 		// requery to refresh listview to reflect db changes
 		data.requery();
 	}
-	
+
 	/*
 	 * update item with count
 	 */
 	protected void updateItem(String name, int count) {
-		
+
 		ContentValues updateItem = new ContentValues();
 		database = dataHelper.getWritableDatabase();
 
@@ -466,7 +474,7 @@ public class FridgeActivity extends Activity {
 
 		// requery to refresh listview to reflect db changes
 		data.requery();
-		
+
 	}
 
 }
