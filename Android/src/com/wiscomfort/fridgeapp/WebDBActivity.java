@@ -34,10 +34,11 @@ public class WebDBActivity extends Activity {
 	protected static final int UPDATE_FRIDGE_REQUEST = FridgeActivity.UPDATE_FRIDGE_REQUEST;
 	protected static final int SEARCH_FRIDGE_REQUEST = FridgeActivity.SEARCH_FRIDGE_REQUEST;
 	protected static final int WEB_SCAN_RESULT = FridgeActivity.WEB_SCAN_RESULT;
-	private static final int nITEMS_FROM_FRIDGE = 0;
-	private static final int nSEARCH_FOR_UPC = 1;
+	private static final int nITEMS_FROM_FRIDGE_NAME = 0;
+	private static final int nITEMS_FROM_FRIDGE_ID = 1;	
 	private static final int nADD_ITEM_URL = 2;
 	private static final int nADD_ITEM_HACK = 3;
+	private static final int nSEARCH_FOR_UPC = 4;
 	private String response;
 	private String upc_from_intent;
 	/** Called when the activity is first created. */
@@ -48,14 +49,12 @@ public class WebDBActivity extends Activity {
 		String[] urls = new String[10];
 
 		String base_url = "http://ec2-23-20-255-144.compute-1.amazonaws.com/fridge/";
-		String login = base_url + "login/";
-		String search_fridge = base_url + "search/";
-		String search_upc = base_url + "search-upc/?q=";
-		String post_item = base_url + "update-item/";
-		//String post_item = base_url + "login/";
-		// TODO get this the query filter from user qr scan
-		//urls[nITEMS_FROM_FRIDGE] = search_fridge;
 
+		String login 				=	base_url + "login/";
+		String search_fridge_name 	=	base_url + "search/?q=";
+		String search_fridge_id		=	base_url + "search-id/?q=";	//TODO add to django
+		String search_upc 			=	base_url + "search-upc/?q=";
+		String post_item 			=	base_url + "update-item/";
 
 
 		Intent intent = this.getIntent();
@@ -71,20 +70,22 @@ public class WebDBActivity extends Activity {
 		if(extras != null){
 			if(extras.containsKey("upc")){
 				upc_from_intent = (String)extras.get("upc");
-				if(extras.containsKey("name") && extras.containsKey("initial_amount")){
-					// TODO need to set a flag here
-				}
-
 				search_upc += upc_from_intent;
 				urls[nSEARCH_FOR_UPC] = search_upc;
-
 			}else if(extras.containsKey("item_to_add")){
 				String item_to_add = (String)extras.get("item_to_add");
 				urls[nADD_ITEM_URL] = post_item;
-				urls[nADD_ITEM_HACK] = item_to_add;
+				urls[nADD_ITEM_HACK] 			= 	item_to_add;
+			}else if(extras.containsKey("fridge_name")){
+				search_fridge_name 	+=	extras.getString("fridge_name");
+				urls[nITEMS_FROM_FRIDGE_NAME] 	= 	search_fridge_name;
+			}else if(extras.containsKey("fridge_id")){
+				search_fridge_id	+=	extras.getString("fridge_id");
+				urls[nITEMS_FROM_FRIDGE_ID]		=	search_fridge_id;
 			}else{
-				//TODO return failure	
+				//TODO return failure
 			}
+
 		}else{
 			//TODO return failure
 		}
@@ -118,97 +119,85 @@ public class WebDBActivity extends Activity {
 		 * @return */
 		protected String doInBackground(String... urls) {
 			HttpClient httpclient = new DefaultHttpClient();
-			JSONArray result = null;
+			JSONArray result = new JSONArray();
 
-			if( urls[nITEMS_FROM_FRIDGE] != null ){
-				result = searchFridge(httpclient, urls[nITEMS_FROM_FRIDGE]);	
+			if( urls[nITEMS_FROM_FRIDGE_NAME] != null ){
+				result = getJSON(httpclient, urls[nITEMS_FROM_FRIDGE_NAME]);	
 			}
 			if( urls[nSEARCH_FOR_UPC] != null ){
-				result = searchFridge(httpclient, urls[nSEARCH_FOR_UPC]);	
+				result = getJSON(httpclient, urls[nSEARCH_FOR_UPC]);	
 			}
 			if( urls[nADD_ITEM_HACK] != null ){
 				result = postFridge(httpclient, urls[nADD_ITEM_URL], urls[nADD_ITEM_HACK]);
 			}
-
+			if( urls[nITEMS_FROM_FRIDGE_ID] != null){
+				result = getJSON(httpclient, urls[nITEMS_FROM_FRIDGE_ID]);
+			}
 
 			try {
 				return result.toString(0);
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return null;
+
+			return "[]";
 		}
 
 
 		private JSONArray postFridge(HttpClient httpclient, String url,
 				String json_item_to_add) {
-			String body = "";
-			String charset = null;
+			String body = "[]";
+			JSONArray jsonarray = new JSONArray();
 
 			try {			
 				HttpPost httppost = new HttpPost(url);
 				httppost.setHeader("Accept", "text/html");
-				/*
-				StringEntity input = new StringEntity(json_item_to_add);
-				input.setContentType("application/json");
-				httppost.setEntity(input);
-				 */
+
 				// Convert json back to FridgeItem so django has to do less work
 				DjangoModel[] models = DjangoParser.parseJsonModels(json_item_to_add);
 				ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
 				if(items.size() != 1){
-					return null; //TODO fail if posting more than one item at a time for now.
+					return jsonarray; //TODO fail if posting more than one item at a time for now.
 				}
 
 				// call method using items that returns List<NameValuePair> for all item attributes
 				List<NameValuePair> nameValuePairs = DjangoParser.getAttributesValuePairs(items.get(0));			
 				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
-				/*
-				HttpParams params = new BasicHttpParams();
-				params.setParameter("item_to_add", json_item_to_add);
-				httppost.setParams(params);
-				*/
-				
 				HttpResponse response = httpclient.execute(httppost);
 				HttpEntity entity = response.getEntity();
-				
+
 
 				body = (EntityUtils.toString(entity));
-				charset = (EntityUtils.getContentCharSet(entity));
+
 				Header header = entity.getContentType();
 
 				JSONTokener jsontokener = new JSONTokener(body);
 				try {
-					JSONArray jsonarray = new JSONArray(jsontokener);
+					jsonarray = new JSONArray(jsontokener);
 					return jsonarray;
 				} catch (JSONException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
-				return null; //"#CHANGE_ME";
-
 			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-			return null; //"#CHANGE_ME";
-
+			return jsonarray;
 		}
 
 
 		/*
-		 * TODO Post to django with fridge auth code
+		 * Get request to django url. Expecting JSON back.
 		 */
-		protected JSONArray searchFridge(HttpClient httpclient, String url){
-			String body = "";
+		protected JSONArray getJSON(HttpClient httpclient, String url){
+			String body = "[]";
 			String charset = null;
+			JSONArray jsonarray = new JSONArray();
 
 			try {			
 				HttpGet httpget = new HttpGet(url);
@@ -222,25 +211,18 @@ public class WebDBActivity extends Activity {
 
 				JSONTokener jsontokener = new JSONTokener(body);
 				try {
-					JSONArray jsonarray = new JSONArray(jsontokener);
+					jsonarray = new JSONArray(jsontokener);
 					return jsonarray;
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-
-				return null; //"#CHANGE_ME";
-
 			} catch (ClientProtocolException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-			return null; //"#CHANGE_ME";
-
+			return jsonarray; //jsonarray should be empty if we get here
 		}
 
 		/** The system calls this to perform work in the UI thread and delivers
