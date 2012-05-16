@@ -43,6 +43,7 @@ public class FridgeActivity extends Activity {
 	protected static final int CONFLICT_IGNORE = 4;
 	protected static final int ADD_ITEM_DIALOG = 100;
 	protected static final int UPDATE_ITEM_DIALOG = 101;
+	protected static final int ADD_VIA_SCAN_DIALOG = 102;
 	private static final String TAG = "FridgeActivity";
 	protected static final int UPDATE_FRIDGE_REQUEST = 200;
 	protected static final int SEARCH_FRIDGE_REQUEST = 201;
@@ -196,6 +197,7 @@ public class FridgeActivity extends Activity {
 			String webResult = data.getStringExtra("json_items");
 			DjangoModel[] models = DjangoParser.parseJsonModels(webResult);
 			items = DjangoParser.makeItemsFromModels(models);
+			this.showDialog(ADD_VIA_SCAN_DIALOG);
 		}
 		else {
 			return;
@@ -216,14 +218,52 @@ public class FridgeActivity extends Activity {
 		case UPDATE_ITEM_DIALOG:
 			dialog = getInstanceUpdateDialog();
 			break;
-
+			
+		case ADD_VIA_SCAN_DIALOG:
+			dialog = getInstanceAddViaScan(this.items);
+			break;
 		default:
 			dialog = null;
 		}
 		return dialog;
 	}
 
+private Dialog getInstanceAddViaScan(ArrayList<FridgeItem> scanResult){
+	final Dialog dialog = new Dialog(this);
+	dialog.setContentView(R.layout.add_via_scan);
+	dialog.setTitle("Add Item");
+	TextView text = (TextView) dialog.findViewById(R.id.add_text);
+	text.setText("Please ensure data from scan is correct!.");
 
+	ImageView image = (ImageView) dialog.findViewById(R.id.add_image);
+	image.setImageResource(R.drawable.ic_launcher);
+	String name = null;
+	String count = null;
+	if(scanResult != null){
+		name = scanResult.get(0).getName();
+		count = scanResult.get(0).getAmountString();
+	}
+	else{
+		dialog.dismiss();
+		Toast.makeText(getApplicationContext(), "UPC not in database!", Toast.LENGTH_SHORT).show();
+	}
+	
+	final EditText editItemName = (EditText) dialog.findViewById(R.id.add_item_name);
+	final EditText editItemCount = (EditText) dialog.findViewById(R.id.add_item_count);
+	
+	editItemName.setText(name);
+	editItemCount.setText(count);
+	
+	Button submit = (Button) dialog.findViewById(R.id.submit_add);
+	submit.setOnClickListener( new OnClickListener() {
+		public void onClick(View v){
+			
+		}
+	});
+	
+	return dialog;
+}
+	
 	/*
 	 * Here's where we actually build the AddDialog
 	 */
@@ -264,6 +304,7 @@ public class FridgeActivity extends Activity {
 				Intent i = new Intent("com.google.zxing.client.android.SCAN");
 				i.putExtra("SCAN_MODE", "PRODUCT_MODE");
 				startActivityForResult(i, ZXING_SCAN_DIRECT);
+				dialog.dismiss();
 			}
 
 		});
