@@ -24,6 +24,13 @@ public class DjangoModel {
 		}
 	}
 	
+	public String getPK(){
+		return this.pk;
+	}
+	public Fields getFields(){
+		return this.fields;
+	}
+	
 }
 
 
@@ -42,4 +49,19 @@ class Fields {
 		return "amount: " + amount + ", fridge: " + fridge;
 	}
 	
+	public int getInintal_amount(){
+		return this.initial_amount; 
+	}
+	
+	public int getAmount(){
+		return this.amount;
+	}
+	
+	public String getUPC(){
+		return this.upc;
+	}
+	
+	public int getFridge(){
+		return this.fridge;
+	}
 }
