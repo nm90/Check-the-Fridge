@@ -58,7 +58,6 @@ public class WebDBActivity extends Activity {
 		String search_upc 			=	base_url + "search-upc/?q=";
 		String post_item 			=	base_url + "update-item/";
 
-
 		Intent intent = this.getIntent();
 		int flags = intent.getFlags();
 		intent.getAction();
@@ -76,7 +75,7 @@ public class WebDBActivity extends Activity {
 				urls[nSEARCH_FOR_UPC] = search_upc;
 			}else if(extras.containsKey("item_to_add")){
 				String item_to_add = (String)extras.get("item_to_add");
-				urls[nADD_ITEM_URL] = post_item;
+				urls[nADD_ITEM_URL] 			=	post_item;
 				urls[nADD_ITEM_HACK] 			= 	item_to_add;
 			}else if(extras.containsKey("fridge_name")){
 				search_fridge_name 	+=	extras.getString("fridge_name");
@@ -85,17 +84,14 @@ public class WebDBActivity extends Activity {
 				search_fridge_id	+=	extras.getString("fridge_id");
 				urls[nITEMS_FROM_FRIDGE_ID]		=	search_fridge_id;
 			}else{
-				//TODO return failure
+				//TODO return unknown extra detected
 			}
-
 		}else{
-			//TODO return failure
+			//TODO return extra required
 		}
 
 
-
 		new DownloadJsonItems().execute(urls);
-
 	}
 
 
@@ -146,6 +142,9 @@ public class WebDBActivity extends Activity {
 		}
 
 
+		/*
+		 * 
+		 */
 		private JSONArray postFridge(HttpClient httpclient, String url,
 				String json_item_to_add) {
 			String body = "[]";
