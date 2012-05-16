@@ -49,7 +49,7 @@ public class DjangoParser {
 		nameValuePairs.add(new BasicNameValuePair("amount", fridgeItem.getAmountString()));
 		nameValuePairs.add(new BasicNameValuePair("initial_amount", fridgeItem.getInitAmountString()));
 		nameValuePairs.add(new BasicNameValuePair("upc", fridgeItem.getUPC()));
-		nameValuePairs.add(new BasicNameValuePair("fridge_id", fridgeItem.getName()));
+		nameValuePairs.add(new BasicNameValuePair("fridge_id", fridgeItem.getFridgeIDString()));
 		
 		return nameValuePairs;
 	}
