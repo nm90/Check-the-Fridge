@@ -24,6 +24,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import com.google.gson.Gson;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -148,20 +150,17 @@ public class WebDBActivity extends Activity {
 				String json_item_to_add) {
 			String body = "[]";
 			JSONArray jsonarray = new JSONArray();
-
+			Gson gson = new Gson();
+			
 			try {			
 				HttpPost httppost = new HttpPost(url);
 				httppost.setHeader("Accept", "text/html");
 
 				// Convert json back to FridgeItem so django has to do less work
-				DjangoModel[] models = DjangoParser.parseJsonModels(json_item_to_add);
-				ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
-				if(items.size() != 1){
-					return jsonarray; //TODO fail if posting more than one item at a time for now.
-				}
+				FridgeItem item_to_add = gson.fromJson(json_item_to_add, FridgeItem.class);
 
 				// call method using items that returns List<NameValuePair> for all item attributes
-				List<NameValuePair> nameValuePairs = DjangoParser.getAttributesValuePairs(items.get(0));			
+				List<NameValuePair> nameValuePairs = DjangoParser.getAttributesValuePairs(item_to_add);			
 				httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 
 				HttpResponse response = httpclient.execute(httppost);
