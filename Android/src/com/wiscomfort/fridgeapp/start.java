@@ -7,7 +7,7 @@ import android.os.Handler;
 
 public class start extends Activity{
 
-	 protected int splashTime = 6000; 
+	 protected int splashTime = 1000; 
 	 
      public void onCreate(Bundle savedInstanceState) { 
        super.onCreate(savedInstanceState); 
