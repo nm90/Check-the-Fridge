@@ -14,14 +14,26 @@ class Item(models.Model):
 
     amount = models.PositiveIntegerField( default=1 )
 
+    initial_amount = models.PositiveIntegerField( default=1 )
+
     fridge = models.ForeignKey(Fridge)
 
     upc = models.CharField( max_length=15 )
 
-    initial_amount = models.PositiveIntegerField( default=1 )
-
-    unique_together = ("name", "fridge")
+    unique_together = ("name", "fridge", "upc")
 
     def __unicode__(self):
-        return (self.name + ( " : %d" % self.amount) )
+        return (self.name + ( " : %d" % self.amount) + ( " : %s" % self.upc))
+
+    def save(self, *args, **kwargs):
+        super(Item, self).save(*args, **kwargs)
+        """
+        self.name = kwargs['name']
+        self.amount = kwargs['amount']
+        self.initial_amount = kwargs['initial_amount']
+        self.fridge = kwargs['fridge']
+        self.upc = kwargs['upc']
+        return
+        """
+
 
