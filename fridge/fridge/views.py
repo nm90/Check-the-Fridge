@@ -106,8 +106,9 @@ def search_upc(request):
 
 
 """
-if POSTing UPC code,
-look for an item in the fridge that has a upc matching the ['q']
+if UPC code and Item pair already match, we want to increment amount
+
+returns the posted_item on success
 """
 @csrf_exempt
 def update_item(request):
@@ -132,6 +133,23 @@ def update_item(request):
     return response
 
 
+"""
+Search for items from the fridge with fridge_id passed as /q?=
+"""
+def search_id(request):
+
+    if 'q' in request.GET:
+        response = HttpResponse()
+        serializers.serialize("json", Item.objects.filter(fridge__id=request.GET['q']), stream=response)
+        return response
+
+    response = "Empty Search"
+    return response
+
+
+"""
+Search for items from the fridge with fridge.name passed as /q?=
+"""
 def search(request):
 
     if 'q' in request.GET:
