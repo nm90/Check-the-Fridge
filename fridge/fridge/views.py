@@ -106,7 +106,6 @@ def search_upc(request):
 
 
 """
-if UPC code and Item pair already match, we want to increment amount
 
 returns the posted_item on success
 """
@@ -121,9 +120,16 @@ def update_item(request):
         item_fridge_id = request.POST['fridge_id']
         item_upc = request.POST['upc']
 
-        item_fridge = Fridge.objects.get(id=item_fridge_id)
+        fridge_obj = Fridge.objects.get(id=item_fridge_id)
 
-        item_to_save = Item(name=item_name, amount=item_amount, initial_amount=item_initamount, fridge=item_fridge, upc=item_upc)
+        #if UPC code and Item pair already match, we want to increment amount
+        if len(Item.objects.filter(fridge_id=item_fridge_id).filter(name=item_name)) == 0:
+            item_to_save = Item(name=item_name, amount=item_amount, initial_amount=item_initamount, fridge=fridge_obj, upc=item_upc)
+        else:
+            item_to_save = Item.objects.get(name=item_name)
+            item_to_save.amount += item_amount
+            item_to_save.initial_amount = item_amount
+
 
         item_to_save.save()
 
