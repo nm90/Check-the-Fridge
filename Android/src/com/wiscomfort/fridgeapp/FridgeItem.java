@@ -18,6 +18,13 @@ public class FridgeItem {
 			this.fridge_id = fridge;
 			this.UPC = UPC;
 		}
+		public FridgeItem(String pk, int amount, int fridge, String UPC){
+			this.name = pk;
+			this.amount = amount;
+			this.inital_amount = amount;
+			this.fridge_id = fridge;
+			this.UPC = UPC;
+		}
 		
 		public FridgeItem(DjangoModel model){
 			this.name = model.getPK();

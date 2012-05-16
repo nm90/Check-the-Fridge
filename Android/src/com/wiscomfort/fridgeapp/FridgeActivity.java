@@ -47,6 +47,8 @@ public class FridgeActivity extends Activity {
 	private static final String TAG = "FridgeActivity";
 	protected static final int UPDATE_FRIDGE_REQUEST = 200;
 	protected static final int SEARCH_FRIDGE_REQUEST = 201;
+	protected static final int ADD_TO_FRIDGE_REQUEST = 202;
+	protected static final int QUERY_REQUEST = 203;
 	protected static final int ZXING_SCAN_FROM_ADD = 300;
 	protected static final int ZXING_SCAN_DIRECT = 301;
 	protected static final int WEB_SCAN_RESULT = 400;
@@ -58,7 +60,9 @@ public class FridgeActivity extends Activity {
 	protected SimpleCursorAdapter dataSource;
 	protected SQLiteDatabase database;
 	protected String selectedItem;
+	private static String scannedUPC;
 	private static ArrayList<FridgeItem> items;
+	private static int fridgeID;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -122,28 +126,6 @@ public class FridgeActivity extends Activity {
 			DjangoModel[] models = DjangoParser.parseJsonModels(json_string);
 
 			// TODO This is where we should update the FridgeView
-			try {
-				JSONArray json_array = new JSONArray(json_string);
-				int i = 0;
-				String informationArray[];
-				String jsonName;
-				String jsonAmount;
-				while(!json_array.get(i).equals(null)){
-					informationArray = json_array.getString(i).split(",");
-					jsonAmount = informationArray[2];
-					informationArray = informationArray[1].split(":");
-					jsonName = informationArray[1].replace("\"", "");
-					informationArray = jsonAmount.split(":");
-					jsonAmount = informationArray[2];
-					addItem(jsonName, Integer.parseInt(jsonAmount), "000000000" );
-					updateItem(jsonName, Integer.parseInt(jsonAmount));
-					i++;
-				}
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-
 			return;
 		}
 		else if (requestCode == ZXING_SCAN_FROM_ADD){
@@ -167,37 +149,24 @@ public class FridgeActivity extends Activity {
 			// This is where we want to try and add UPC to webserver
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
-				// launch webactivity add upc to extras
+				this.scannedUPC = upc;
 				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
-						com.wiscomfort.fridgeapp.WebDBActivity.class);
+				com.wiscomfort.fridgeapp.WebDBActivity.class);
 				i.putExtra("upc", upc);
-				//i.putExtra("upc", "000000000");
 				startActivityForResult(i, WEB_SCAN_RESULT);
 			}
-			// TODO searching local database doesn't work currently
-			/*
-			if (data != null) {
-				String result = data.getStringExtra("SCAN_RESULT");
-
-				if(Pattern.matches("[0-9]{1,13}", result)) {
-					SQLiteDatabase database = dataHelper.getReadableDatabase();
-					String mySQL="SELECT * FROM " + DataHelper.SOURCE_TABLE_NAME + " WHERE UPC LIKE '"+ result + "'";
-					this.data = database.rawQuery( mySQL, null);
-					if(this.data.getCount() != 0){
-						this.data.moveToPosition(0);
-						updateItem(this.data.getString(this.data.getColumnIndex("name")), Integer.parseInt(this.data.getString(this.data.getColumnIndex("start_amount"))));
-					}
-				}
-			}
-			else{
-				return;
-			}*/
 		}
 		else if(requestCode == WEB_SCAN_RESULT){
 			String webResult = data.getStringExtra("json_items");
 			DjangoModel[] models = DjangoParser.parseJsonModels(webResult);
 			items = DjangoParser.makeItemsFromModels(models);
 			this.showDialog(ADD_VIA_SCAN_DIALOG);
+		}	
+		else if(requestCode == ADD_TO_FRIDGE_REQUEST){
+			//TODO use addItem method to add to local DB if json is handed back 
+		}
+		else if(requestCode == QUERY_REQUEST){
+			//TODO clear local database and repropagate with return data.
 		}
 		else {
 			return;
@@ -218,9 +187,9 @@ public class FridgeActivity extends Activity {
 		case UPDATE_ITEM_DIALOG:
 			dialog = getInstanceUpdateDialog();
 			break;
-			
+
 		case ADD_VIA_SCAN_DIALOG:
-			dialog = getInstanceAddViaScan(this.items);
+			dialog = getInstanceAddViaScan();
 			break;
 		default:
 			dialog = null;
@@ -228,42 +197,78 @@ public class FridgeActivity extends Activity {
 		return dialog;
 	}
 
-private Dialog getInstanceAddViaScan(ArrayList<FridgeItem> scanResult){
-	final Dialog dialog = new Dialog(this);
-	dialog.setContentView(R.layout.add_via_scan);
-	dialog.setTitle("Add Item");
-	TextView text = (TextView) dialog.findViewById(R.id.add_text);
-	text.setText("Please ensure data from scan is correct!.");
+	private Dialog getInstanceAddViaScan(){
+		final Dialog dialog = new Dialog(this);
+		dialog.setContentView(R.layout.add_via_scan);
+		dialog.setTitle("Add Item");
+		// launch webactivity add upc to extras
+		
+		TextView text = (TextView) dialog.findViewById(R.id.add_text);
+		
 
-	ImageView image = (ImageView) dialog.findViewById(R.id.add_image);
-	image.setImageResource(R.drawable.ic_launcher);
-	String name = null;
-	String count = null;
-	if(scanResult != null){
-		name = scanResult.get(0).getName();
-		count = scanResult.get(0).getAmountString();
-	}
-	else{
-		dialog.dismiss();
-		Toast.makeText(getApplicationContext(), "UPC not in database!", Toast.LENGTH_SHORT).show();
-	}
-	
-	final EditText editItemName = (EditText) dialog.findViewById(R.id.add_item_name);
-	final EditText editItemCount = (EditText) dialog.findViewById(R.id.add_item_count);
-	
-	editItemName.setText(name);
-	editItemCount.setText(count);
-	
-	Button submit = (Button) dialog.findViewById(R.id.submit_add);
-	submit.setOnClickListener( new OnClickListener() {
-		public void onClick(View v){
+
+		ImageView image = (ImageView) dialog.findViewById(R.id.add_image);
+		image.setImageResource(R.drawable.ic_launcher);
+		String name = null;
+		String count = null;
+		final FridgeItem scannedItem;
+		final EditText editItemName = (EditText) dialog.findViewById(R.id.add_item_name);
+		final EditText editItemCount = (EditText) dialog.findViewById(R.id.add_item_count);
+		Button submit = (Button) dialog.findViewById(R.id.submit_add);
+		ArrayList<FridgeItem> scanResult = getItems();
+
+		if(scanResult == null || scanResult.isEmpty()){
+			text.setText("UPC not in database add it now!.");
+			editItemName.setText("Name");
+			editItemCount.setText("Count");
 			
 		}
-	});
-	
-	return dialog;
-}
-	
+		else if(scanResult != null){
+			text.setText("Please ensure data from scan is correct!.");
+			scannedItem = scanResult.get(0);
+			name = scanResult.get(0).getName();
+			count = scanResult.get(0).getAmountString();
+
+			editItemName.setText(name);
+			editItemCount.setText(count);
+		}
+			
+		submit.setOnClickListener( new OnClickListener() {
+				public void onClick(View v){
+					String name = editItemName.getText().toString();
+					int count = -1;
+					try{
+						count = Integer.parseInt(editItemCount.getText().toString());
+					}catch(Exception e){
+						dialog.dismiss();
+					}
+					if(editItemName.getText().toString().isEmpty() || count < 0){
+						dialog.dismiss();
+					}else{
+						FridgeItem itemToAdd = new FridgeItem(name, count, FridgeActivity.getFridgeID() , FridgeActivity.getScannedUPC());
+						addItemToWeb(itemToAdd);
+					}
+				}
+			});
+		return dialog;
+	}
+
+	protected void addItemToWeb(FridgeItem itemToAdd) {
+		Gson gson = new Gson();
+		String item_to_add = gson.toJson(itemToAdd);
+		Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+				com.wiscomfort.fridgeapp.WebDBActivity.class);
+		i.putExtra("item_to_add", item_to_add);
+		startActivityForResult(i, ADD_TO_FRIDGE_REQUEST);
+	}
+
+	protected void queryServer(int fridgeID){
+		Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+				com.wiscomfort.fridgeapp.WebDBActivity.class);
+		i.putExtra("fridge_id", fridgeID);
+		startActivityForResult(i, QUERY_REQUEST);
+	}
+
 	/*
 	 * Here's where we actually build the AddDialog
 	 */
@@ -296,7 +301,6 @@ private Dialog getInstanceAddViaScan(ArrayList<FridgeItem> scanResult){
 		debug = "text: " + text.toString();
 		Log.d(TAG, debug);
 
-		final CheckBox scanNewUPC =  (CheckBox) dialog.findViewById(R.id.scan_barcode_on_add);
 
 		Button scan = (Button) dialog.findViewById(R.id.add_via_scan);
 		scan.setOnClickListener( new OnClickListener() {
@@ -321,17 +325,7 @@ private Dialog getInstanceAddViaScan(ArrayList<FridgeItem> scanResult){
 					//TODO handle this failure better
 				}
 				if (!itemToAdd.isEmpty() && countToAdd > 0) { 
-					if(scanNewUPC.isChecked()){
-						addItem(itemToAdd, countToAdd, FLAG_FOR_UPDATE_UPC);
-						selectedItem = itemToAdd;
-						Intent i = new Intent("com.google.zxing.client.android.SCAN");
-						i.putExtra("SCAN_MODE", "PRODUCT_MODE");
-						startActivityForResult(i, ZXING_SCAN_FROM_ADD);
-
-					}
-					else{
-						addItem(itemToAdd, countToAdd, "000000000");
-					}
+					addItem(itemToAdd, countToAdd, "000000000");
 				}
 				else if(itemToAdd.isEmpty()){
 					Toast.makeText(getApplicationContext(), "Need a name to identify the item!", Toast.LENGTH_SHORT).show();
@@ -346,33 +340,15 @@ private Dialog getInstanceAddViaScan(ArrayList<FridgeItem> scanResult){
 				dialog.dismiss();
 
 			}
-
-
 		});
-
-		/*public void onScanResultListener() {
-			if(!FridgeActivity.items.isEmpty()){
-				editItemName.setText(FridgeActivity.items.get(0).getName());
-				editItemCount.setText(FridgeActivity.items.get(0).getAmount());
-				scanNewUPC.setChecked(false);
-			}
-			else{
-				editItemName.setText("Name");
-				editItemCount.setText("Count");
-				dialog.dismiss();
-				Toast.makeText(getApplicationContext(), "That Beer is not in the DataBase Add it!", Toast.LENGTH_SHORT).show();
-			}
-			return;
-		}*/
-		
 		debug = "addItemSubmit: " + submit.toString();
 		Log.d(TAG, debug);
 
 		return dialog;
 	}
-	
-	
-	
+
+
+
 
 
 	/*
@@ -488,6 +464,17 @@ private Dialog getInstanceAddViaScan(ArrayList<FridgeItem> scanResult){
 		// requery to refresh listview to reflect db changes
 		data.requery();
 
+	}
+
+	protected static String getScannedUPC(){
+		return scannedUPC;
+	}
+	protected static int getFridgeID(){
+		return fridgeID;
+	}
+
+	protected static ArrayList<FridgeItem> getItems(){
+		return items;
 	}
 
 }
