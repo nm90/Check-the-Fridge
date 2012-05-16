@@ -48,7 +48,7 @@ public class FridgeActivity extends Activity {
 	protected static final int SEARCH_FRIDGE_REQUEST = 201;
 	protected static final int ZXING_SCAN_FROM_ADD = 300;
 	protected static final int ZXING_SCAN_DIRECT = 301;
-	private static final int WEB_SCAN_RESULT = 400;
+	protected static final int WEB_SCAN_RESULT = 400;
 	protected static final String FLAG_FOR_UPDATE_UPC = "999999999";
 
 	private String debug = new String();
