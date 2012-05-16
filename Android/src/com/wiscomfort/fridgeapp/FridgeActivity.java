@@ -96,45 +96,15 @@ public class FridgeActivity extends Activity {
 			if(!this.getClass().equals(com.wiscomfort.fridgeapp.WebDBActivity.class)){
 				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
 						com.wiscomfort.fridgeapp.WebDBActivity.class);
-
+				String json_item = "[{\"pk\": \"Apple Jills\", \"model\": \"fridge.item\", "+ 
+						"\"fields\": {\"initial_amount\": 1, \"amount\": 1, \"fridge\": 1, \"upc\": \"042111111111\"}}]";
+				i.putExtra("item_to_add", json_item);
 				startActivityForResult(i, UPDATE_FRIDGE_REQUEST);
 			}
 
 		default:
 			return super.onContextItemSelected(item);
 		}
-	}
-
-
-	/*
-	 * Create DjangoModel objects in java from json from server
-	 */
-	private DjangoModel[] parseJsonModels(String json_items) {
-		// Use JSONStringer to move json models to java objects
-		// for every item in the fridge, create java object from json
-		Gson gson = new Gson();
-
-		DjangoModel[] models = gson.fromJson(json_items, DjangoModel[].class);
-		return models;
-		//String json = gson.toJson(models);
-		//System.out.println(json);	
-	}
-
-
-	/*
-	 * Create items after looking through DjangoModel objects
-	 */
-	private ArrayList<FridgeItem> makeItemsFromModels(DjangoModel[] models) {
-
-		ArrayList<FridgeItem> items = new ArrayList<FridgeItem>();
-
-		for(DjangoModel model : models){
-			if(model.isItem()){
-				items.add(new FridgeItem(model));
-			}
-		}
-
-		return items;
 	}
 
 
@@ -148,7 +118,7 @@ public class FridgeActivity extends Activity {
 			Bundle extras = data.getExtras();
 			//TODO update list of items using the json here
 			String json_string = (String) extras.get("json_items");
-			DjangoModel[] models = parseJsonModels(json_string);
+			DjangoModel[] models = DjangoParser.parseJsonModels(json_string);
 
 			// TODO This is where we should update the FridgeView
 			try {
@@ -224,8 +194,8 @@ public class FridgeActivity extends Activity {
 		}
 		else if(requestCode == WEB_SCAN_RESULT){
 			String webResult = data.getStringExtra("json_items");
-			DjangoModel[] models = parseJsonModels(webResult);
-			this.items = makeItemsFromModels(models);
+			DjangoModel[] models = DjangoParser.parseJsonModels(webResult);
+			items = DjangoParser.makeItemsFromModels(models);
 		}
 		else {
 			return;
