@@ -57,6 +57,7 @@ public class FridgeActivity extends Activity {
 	protected SimpleCursorAdapter dataSource;
 	protected SQLiteDatabase database;
 	protected String selectedItem;
+	private static ArrayList<FridgeItem> items;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -129,7 +130,7 @@ public class FridgeActivity extends Activity {
 		
 		for(DjangoModel model : models){
 			if(model.isItem()){
-				// make model into Item
+				items.add(new FridgeItem(model));
 			}
 		}
 		
@@ -195,7 +196,9 @@ public class FridgeActivity extends Activity {
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
 				// launch webactivity add upc to extras
-				
+				Intent i = new Intent("com.wiscomfort.fridgeapp.UpdateFridgeActivity");
+				i.putExtra("upc", upc);
+				startActivityForResult(i, WEB_SCAN_RESULT);
 			}
 			// TODO searching local database doesn't work currently
 			/*
@@ -217,7 +220,9 @@ public class FridgeActivity extends Activity {
 			}*/
 		}
 		else if(requestCode == WEB_SCAN_RESULT){
-			
+			String webResult = data.getStringExtra("json_items");
+			DjangoModel[] models = parseJsonModels(webResult);
+			this.items = makeItemsFromModels(models);
 		}
 		else {
 			return;
@@ -286,11 +291,18 @@ public class FridgeActivity extends Activity {
 				Intent i = new Intent("com.google.zxing.client.android.SCAN");
 				i.putExtra("SCAN_MODE", "PRODUCT_MODE");
 				startActivityForResult(i, ZXING_SCAN_DIRECT);
+				if(!FridgeActivity.items.isEmpty()){
+					editItemName.setText(FridgeActivity.items.get(0).getName());
+					editItemCount.setText(FridgeActivity.items.get(0).getAmount());
 					scanNewUPC.setChecked(false);
-					editItemName.setText("name");
-					editItemCount.setText("count");
+				}
+				else{
+					editItemName.setText("Name");
+					editItemCount.setText("Count");
 					dialog.dismiss();
-					//TODO not sure how to attach the UPC, needs to be an update not an add.
+					Toast.makeText(getApplicationContext(), "That Beer is not in the DataBase Add it!", Toast.LENGTH_SHORT).show();
+				}
+
 			}
 		});
 
@@ -312,10 +324,17 @@ public class FridgeActivity extends Activity {
 						Intent i = new Intent("com.google.zxing.client.android.SCAN");
 						i.putExtra("SCAN_MODE", "PRODUCT_MODE");
 						startActivityForResult(i, ZXING_SCAN_FROM_ADD);
+						
 					}
 					else{
 						addItem(itemToAdd, countToAdd, "000000000");
 					}
+				}
+				else if(itemToAdd.isEmpty()){
+					Toast.makeText(getApplicationContext(), "Need a name to identify the item!", Toast.LENGTH_SHORT).show();
+				}
+				else if(countToAdd < 0){
+					Toast.makeText(getApplicationContext(), "Count must be greater then zero!", Toast.LENGTH_SHORT).show();
 				}
 				// empty EditText and close dialog window
 
@@ -367,10 +386,7 @@ public class FridgeActivity extends Activity {
 					return;
 				}
 				System.out.print(count);
-				if(count == 0){
-					removeItem(selectedItem);
-				}
-				else if(count < 0){
+				if(count < 0){
 					Toast.makeText(getApplicationContext(), "Can't have Negative Items!", Toast.LENGTH_SHORT).show();
 				}
 				else{
@@ -422,6 +438,7 @@ public class FridgeActivity extends Activity {
 
 	
 	protected void updateUPC(String UPC){
+		//TODO Have to update the qurey the server for item with FLAG UPC, then replace it with UPC passed
 		ContentValues updateItem = new ContentValues();
 		database = dataHelper.getWritableDatabase();
 		String mySQL="SELECT * FROM " + DataHelper.SOURCE_TABLE_NAME + " WHERE UPC LIKE '"+ FLAG_FOR_UPDATE_UPC + "'";
@@ -438,7 +455,7 @@ public class FridgeActivity extends Activity {
 	 * update item with count
 	 */
 	protected void updateItem(String name, int count) {
-		//TODO FIX BUG. Updating local Android DB causes app to crash
+		
 		ContentValues updateItem = new ContentValues();
 		database = dataHelper.getWritableDatabase();
 
