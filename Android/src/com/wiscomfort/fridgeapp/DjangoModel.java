@@ -2,7 +2,9 @@ package com.wiscomfort.fridgeapp;
 
 import java.util.ArrayList;
 
-
+/*
+ * 
+ */
 public class DjangoModel {
 
 	private String pk;
@@ -22,16 +24,44 @@ public class DjangoModel {
 		}
 	}
 	
+	public String getPK(){
+		return this.pk;
+	}
+	public Fields getFields(){
+		return this.fields;
+	}
+	
 }
 
-class Fields {
 
+/*
+ * 
+ */
+class Fields {
+	private int initial_amount;
 	private int amount;
 	private int fridge;
+	private String upc;
+	
 	
 	@Override
 	public String toString(){
 		return "amount: " + amount + ", fridge: " + fridge;
 	}
 	
+	public int getInintal_amount(){
+		return this.initial_amount; 
+	}
+	
+	public int getAmount(){
+		return this.amount;
+	}
+	
+	public String getUPC(){
+		return this.upc;
+	}
+	
+	public int getFridge(){
+		return this.fridge;
+	}
 }
