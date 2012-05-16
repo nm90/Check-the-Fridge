@@ -115,21 +115,24 @@ def update_item(request):
 
     if request.method == "POST":
         item_name = request.POST['name']
-        item_amount = request.POST['amount']
+        item_amount = int(request.POST['amount'])
         item_initamount = request.POST['initial_amount']
         item_fridge_id = request.POST['fridge_id']
         item_upc = request.POST['upc']
 
         fridge_obj = Fridge.objects.get(id=item_fridge_id)
 
-        #if UPC code and Item pair already match, we want to increment amount
+        # if UPC code and Item pair already match add to
+        # current amount
         if len(Item.objects.filter(fridge_id=item_fridge_id).filter(name=item_name)) == 0:
             item_to_save = Item(name=item_name, amount=item_amount, initial_amount=item_initamount, fridge=fridge_obj, upc=item_upc)
         else:
             item_to_save = Item.objects.get(name=item_name)
-            item_to_save.amount += item_amount
+            if item_to_save.amount >= 0:
+                item_to_save.amount += item_amount
+            else:
+                item_to_save.amount = item_amount
             item_to_save.initial_amount = item_amount
-
 
         item_to_save.save()
 
@@ -146,7 +149,7 @@ def search_id(request):
 
     if 'q' in request.GET:
         response = HttpResponse()
-        serializers.serialize("json", Item.objects.filter(fridge__id=request.GET['q']), stream=response)
+        serializers.serialize("json", Item.objects.filter(fridge__id=request.GET['q']).exclude(amount__lte=0), stream=response)
         return response
 
     response = "Empty Search"
@@ -160,7 +163,7 @@ def search(request):
 
     if 'q' in request.GET:
         response = HttpResponse()
-        serializers.serialize("json", Item.objects.filter(fridge__name=request.GET['q']), stream=response)
+        serializers.serialize("json", Item.objects.filter(fridge__name=request.GET['q']).exclude(amount__lte=0), stream=response)
         return response
 
     response = "Empty Search!"
