@@ -50,6 +50,13 @@ public class FridgeItem {
 		public String toString(){
 			return "Item: " + name + ", amount: " + amount + ", fridge_id: " + fridge_id;
 		}
+
+		public String getAmountString() {
+			return "" + this.amount;
+		}
 		
+		public String getInitAmountString() {
+			return "" + this.amount;
+		}
 		
 }
