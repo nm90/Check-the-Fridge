@@ -2,7 +2,9 @@ package com.wiscomfort.fridgeapp;
 
 import java.util.ArrayList;
 
-
+/*
+ * 
+ */
 public class DjangoModel {
 
 	private String pk;
@@ -24,10 +26,16 @@ public class DjangoModel {
 	
 }
 
-class Fields {
 
+/*
+ * 
+ */
+class Fields {
+	private int initial_amount;
 	private int amount;
 	private int fridge;
+	private String upc;
+	
 	
 	@Override
 	public String toString(){
