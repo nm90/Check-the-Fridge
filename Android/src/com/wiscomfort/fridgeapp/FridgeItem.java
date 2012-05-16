@@ -8,7 +8,7 @@ public class FridgeItem {
 		private String name;
 		private int amount;
 		private int inital_amount;
-		private String UPC;
+		private String upc;
 		private int fridge_id;
 		
 		public FridgeItem(String pk, int amount, int inital_amount, int fridge, String UPC){
@@ -16,14 +16,14 @@ public class FridgeItem {
 			this.amount = amount;
 			this.inital_amount = inital_amount;
 			this.fridge_id = fridge;
-			this.UPC = UPC;
+			this.upc = UPC;
 		}
 		public FridgeItem(String pk, int amount, int fridge, String UPC){
 			this.name = pk;
 			this.amount = amount;
 			this.inital_amount = amount;
 			this.fridge_id = fridge;
-			this.UPC = UPC;
+			this.upc = UPC;
 		}
 		
 		public FridgeItem(DjangoModel model){
@@ -31,11 +31,11 @@ public class FridgeItem {
 			this.amount = model.getFields().getAmount();
 			this.inital_amount = model.getFields().getInintal_amount();
 			this.fridge_id = model.getFields().getFridge();
-			this.UPC = model.getFields().getUPC();
+			this.upc = model.getFields().getUPC();
 		}
 		
 		public String getUPC(){
-			return this.UPC;
+			return this.upc;
 		}
 		
 		public String getName(){
