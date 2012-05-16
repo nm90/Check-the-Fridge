@@ -11,6 +11,7 @@ urlpatterns = patterns('',
     url(r'^fridge/login', 'fridge.views.fridge_login', name='login'),
     url(r'^fridge/search-fridge/$', 'fridge.views.search_form', name='search-fridge'),
     url(r'^fridge/search/$', 'fridge.views.search', name='search'),
+    url(r'^fridge/search-id/$', 'fridge.views.search_id', name='search_id'),
     url(r'^fridge/search-upc/$', 'fridge.views.search_upc', name='search-upc'),
     url(r'^fridge/update-item', 'fridge.views.update_item', name='update-item'),
 
