@@ -62,7 +62,7 @@ public class FridgeActivity extends Activity {
 	protected String selectedItem;
 	private static String scannedUPC;
 	private static ArrayList<FridgeItem> items;
-	private static int fridgeID;
+	private static int fridgeID = 1;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -279,7 +279,7 @@ public class FridgeActivity extends Activity {
 		dialog.setTitle("Add Item");
 
 		TextView text = (TextView) dialog.findViewById(R.id.add_text);
-		text.setText("Please enter an item to add to your fridge.");
+		text.setText("Scan in a new Product or manually enter it below:");
 
 		ImageView image = (ImageView) dialog.findViewById(R.id.add_image);
 		image.setImageResource(R.drawable.ic_launcher);

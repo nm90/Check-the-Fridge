@@ -30,12 +30,16 @@
         android:orientation="vertical"
         android:padding="0dp" >
 
-        <TextView
+		<Button
+            android:id="@+id/add_via_scan"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_scan" />
+	    <TextView
             android:id="@+id/add_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFF" />
-
         <EditText
             android:id="@+id/add_item_name"
             android:layout_width="fill_parent"
@@ -53,17 +57,6 @@
             android:layout_height="wrap_content"
             android:text="@string/submit_add" />
                       
-        <Button
-            android:id="@+id/add_via_scan"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/add_scan" />
-        
-        <CheckBox
-            android:id="@+id/scan_barcode_on_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Scan Barcode on Add" />
     </LinearLayout>
 
 </LinearLayout>
