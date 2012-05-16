@@ -24,26 +24,47 @@ public class WebDBActivity extends Activity {
 	private static final String TAG = "LoginToFridge";
 	protected static final int UPDATE_FRIDGE_REQUEST = FridgeActivity.UPDATE_FRIDGE_REQUEST;
 	protected static final int SEARCH_FRIDGE_REQUEST = FridgeActivity.SEARCH_FRIDGE_REQUEST;
+	private static final int nITEMS_FROM_FRIDGE = 0;
 	private String response;
-
+	private String upc_from_intent;
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		//httpclient.setRedirectHandler(new DefaultRedirectHandler() { });
+		String[] urls = new String[2];
+		
 		String base_url = "http://ec2-23-20-255-144.compute-1.amazonaws.com/";
 		String login = base_url + "fridge/login/";
 		String search_fridge = base_url + "search/";
+		
 		// TODO get this the query filter from user qr scan
-		search_fridge += "?q=SecondFridge";
+		search_fridge += "?q=Bassett";
+		
+		urls[nITEMS_FROM_FRIDGE] = search_fridge;
 		
 		Intent intent = this.getIntent();
 		intent.getAction();
+		
+		Bundle extras = null;
+		try{
+			extras = intent.getExtras();
+		} catch (NullPointerException e) {
+			
+		}
+		if(extras != null){
+			if(extras.containsKey("upc")){
+				upc_from_intent = (String)extras.get("upc");
+			}else{
+				//TODO return failure	
+			}
+		}else{
+			//TODO return failure
+		}
+		
 		int flags = intent.getFlags();
 		
-		String[] urls = new String[2]; 
-		urls[0] = login;
-		urls[1] = search_fridge;
+		 
 		
 		new DownloadJsonItems().execute(urls);
 
@@ -72,8 +93,8 @@ public class WebDBActivity extends Activity {
 		 * @return */
 		protected String doInBackground(String... urls) {
 			HttpClient httpclient = new DefaultHttpClient();
-			String csrftoken = getCsrfToken(httpclient, urls[0]);
-			JSONArray result = getItemsFromFridge(httpclient, urls[1], csrftoken);
+
+			JSONArray result = getItemsFromFridge(httpclient, urls[nITEMS_FROM_FRIDGE]);
 			try {
 				return result.toString(0);
 			} catch (JSONException e) {
@@ -83,9 +104,11 @@ public class WebDBActivity extends Activity {
 			return null;
 		}
 		
+		
 		/*
 		 * Need to load the cookies before posting to django
 		 */
+		/**
 		protected String getCsrfToken(HttpClient httpclient, String url){
 
 			try {			
@@ -120,11 +143,12 @@ public class WebDBActivity extends Activity {
 			}
 			return "#CHANGE_ME";
 		}
+		*/
 		
 		/*
 		 * TODO Post to django with fridge auth code
 		 */
-		protected JSONArray getItemsFromFridge(HttpClient httpclient, String url, String csrftoken){
+		protected JSONArray getItemsFromFridge(HttpClient httpclient, String url){
 			String body = "";
 			String charset = null;
 
