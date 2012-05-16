@@ -16,6 +16,10 @@ class Item(models.Model):
 
     fridge = models.ForeignKey(Fridge)
 
+    upc = models.CharField( max_length=15 )
+
+    initial_amount = models.PositiveIntegerField( default=1 )
+
     unique_together = ("name", "fridge")
 
     def __unicode__(self):
