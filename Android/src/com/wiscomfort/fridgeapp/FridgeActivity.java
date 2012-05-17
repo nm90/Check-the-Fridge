@@ -62,9 +62,9 @@ public class FridgeActivity extends Activity {
 	protected SimpleCursorAdapter dataSource;
 	protected SQLiteDatabase database;
 	protected String selectedItem;
-	private static String scannedUPC;
-	private static ArrayList<FridgeItem> items;
-	private static int fridgeID = 1;
+	private String scannedUPC;
+	private ArrayList<FridgeItem> items;
+	private int fridgeID = 1;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -273,7 +273,7 @@ public class FridgeActivity extends Activity {
 					if(editItemName.getText().toString().isEmpty() || count < 0){
 						dialog.dismiss();
 					}else{
-						FridgeItem itemToAdd = new FridgeItem(name, count, FridgeActivity.getFridgeID() , FridgeActivity.getScannedUPC());
+						FridgeItem itemToAdd = new FridgeItem(name, count, getFridgeID(), getScannedUPC());
 						addItemToWeb(itemToAdd);
 					}
 					dialog.dismiss();
@@ -499,14 +499,14 @@ public class FridgeActivity extends Activity {
 
 	}
 
-	protected static String getScannedUPC(){
+	protected String getScannedUPC(){
 		return scannedUPC;
 	}
-	protected static int getFridgeID(){
+	protected int getFridgeID(){
 		return fridgeID;
 	}
 
-	protected static ArrayList<FridgeItem> getItems(){
+	protected ArrayList<FridgeItem> getItems(){
 		return items;
 	}
 
