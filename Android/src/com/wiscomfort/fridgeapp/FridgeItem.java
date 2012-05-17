@@ -54,6 +54,7 @@ public class FridgeItem {
 			return this.fridge_id;
 		}
 		
+		@Override
 		public String toString(){
 			return "Item: " + name + ", amount: " + amount + ", fridge_id: " + fridge_id;
 		}

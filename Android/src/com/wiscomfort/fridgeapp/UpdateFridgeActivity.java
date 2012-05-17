@@ -57,6 +57,7 @@ public class UpdateFridgeActivity extends Activity {
 		/** The system calls this to perform work in a worker thread and
 		 * delivers it the parameters given to AsyncTask.execute() 
 		 * @return */
+		@Override
 		protected String doInBackground(String... urls) {
 			HttpClient httpclient = new DefaultHttpClient();
 			String csrftoken = getCsrfToken(httpclient, urls[0]);
@@ -150,6 +151,7 @@ public class UpdateFridgeActivity extends Activity {
 
 		/** The system calls this to perform work in the UI thread and delivers
 		 * the result from doInBackground() */
+		@Override
 		protected void onPostExecute(String result) {
 			onPostDownloadListener(result);
 			

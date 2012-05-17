@@ -116,6 +116,7 @@ public class FridgeActivity extends Activity {
 	/*
 	 *
 	 */
+	@Override
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
@@ -133,7 +134,7 @@ public class FridgeActivity extends Activity {
 			// This is where we want to try and add UPC to webserver
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
-				this.scannedUPC = upc;
+				FridgeActivity.scannedUPC = upc;
 				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
 				com.wiscomfort.fridgeapp.WebDBActivity.class);
 				i.putExtra("upc", upc);
@@ -176,6 +177,7 @@ public class FridgeActivity extends Activity {
 	/*
 	 * 
 	 */
+	@Override
 	protected Dialog onCreateDialog(int id){
 		Dialog dialog;
 		switch(id){
@@ -412,7 +414,7 @@ public class FridgeActivity extends Activity {
 		updateItem.put("start_amount", amount);
 		updateItem.put("UPC", UPC);
 
-		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, database.CONFLICT_IGNORE);
+		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, SQLiteDatabase.CONFLICT_IGNORE);
 
 		// requery to refresh listview to reflect db changes
 		// data.requery();
@@ -430,7 +432,7 @@ public class FridgeActivity extends Activity {
 		updateItem.put("start_amount", item.getInital_amount());
 		updateItem.put("UPC", item.getUPC());
 
-		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, database.CONFLICT_IGNORE);
+		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, SQLiteDatabase.CONFLICT_IGNORE);
 
 		// requery to refresh listview to reflect db changes
 		data.requery();
@@ -462,7 +464,7 @@ public class FridgeActivity extends Activity {
 		updateItem.put("name", name);
 		updateItem.put("amount", count);
 
-		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, database.CONFLICT_IGNORE);
+		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, SQLiteDatabase.CONFLICT_IGNORE);
 
 		// requery to refresh listview to reflect db changes
 		data.requery();
