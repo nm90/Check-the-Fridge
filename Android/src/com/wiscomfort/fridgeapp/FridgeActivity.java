@@ -64,7 +64,7 @@ public class FridgeActivity extends Activity {
 	protected String selectedItem;
 	private String scannedUPC;
 	private ArrayList<FridgeItem> items;
-	private int fridgeID = 1;
+	private int fridgeID;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -295,7 +295,7 @@ public class FridgeActivity extends Activity {
 	protected void queryServer(int fridgeID){
 		Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
 				com.wiscomfort.fridgeapp.WebDBActivity.class);
-		i.putExtra("fridge_id", 1);
+		i.putExtra("fridge_id", fridgeID);
 		startActivityForResult(i, QUERY_REQUEST);
 	}
 
