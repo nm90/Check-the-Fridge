@@ -52,7 +52,7 @@ public class FridgeActivity extends Activity {
 	protected static final int ZXING_SCAN_FROM_ADD = 300;
 	protected static final int ZXING_SCAN_DIRECT = 301;
 	protected static final int WEB_SCAN_RESULT = 400;
-	protected static final String FLAG_FOR_UPDATE_UPC = "999999999";
+	protected static final String FLAG_FOR_UPDATE_COUNT = "999999999";
 
 	private String debug = new String();
 	protected DataHelper dataHelper;
@@ -128,22 +128,6 @@ public class FridgeActivity extends Activity {
 			// TODO This is where we should update the FridgeView
 			return;
 		}
-		else if (requestCode == ZXING_SCAN_FROM_ADD){
-			if (data != null) {
-				String result = data.getStringExtra("SCAN_RESULT");
-				if(Pattern.matches("[0-9]{1,13}", result)) {
-					//send update request
-					updateUPC(result);         
-				} 
-				else{
-					updateUPC("000000000");
-				}
-				return;
-			}
-			else{
-				return;
-			}
-		}
 		else if (requestCode == ZXING_SCAN_DIRECT){
 
 			// This is where we want to try and add UPC to webserver
@@ -167,6 +151,18 @@ public class FridgeActivity extends Activity {
 		}
 		else if(requestCode == QUERY_REQUEST){
 			//TODO clear local database and repropagate with return data.
+			database.delete(DataHelper.SOURCE_TABLE_NAME, null, null);
+			Bundle extras = data.getExtras();
+			//TODO update list of items using the json here
+			String json_string = (String) extras.get("json_items");
+			DjangoModel[] models = DjangoParser.parseJsonModels(json_string);
+			ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
+			// requery to refresh listview to reflect db change
+			for(FridgeItem item : items){
+				addItem(item);
+			}
+			this.data.requery();
+			
 		}
 		else {
 			return;
@@ -247,7 +243,9 @@ public class FridgeActivity extends Activity {
 					}else{
 						FridgeItem itemToAdd = new FridgeItem(name, count, FridgeActivity.getFridgeID() , FridgeActivity.getScannedUPC());
 						addItemToWeb(itemToAdd);
+						queryServer(getFridgeID());
 					}
+					dialog.dismiss();
 				}
 			});
 		return dialog;
@@ -279,7 +277,7 @@ public class FridgeActivity extends Activity {
 		dialog.setTitle("Add Item");
 
 		TextView text = (TextView) dialog.findViewById(R.id.add_text);
-		text.setText("Scan in a new Product or manually enter it below:");
+		text.setText("Scan in a new product or manually enter it below:");
 
 		ImageView image = (ImageView) dialog.findViewById(R.id.add_image);
 		image.setImageResource(R.drawable.ic_launcher);
@@ -325,7 +323,9 @@ public class FridgeActivity extends Activity {
 					//TODO handle this failure better
 				}
 				if (!itemToAdd.isEmpty() && countToAdd > 0) { 
-					addItem(itemToAdd, countToAdd, "000000000");
+					FridgeItem item = new FridgeItem(itemToAdd, countToAdd, getFridgeID(), "000000000");
+					addItemToWeb(item);
+					queryServer(getFridgeID());
 				}
 				else if(itemToAdd.isEmpty()){
 					Toast.makeText(getApplicationContext(), "Need a name to identify the item!", Toast.LENGTH_SHORT).show();
@@ -359,9 +359,6 @@ public class FridgeActivity extends Activity {
 		dialog.setContentView(R.layout.update_item_dialog);
 		dialog.setTitle("Update Item");
 
-		//NumberPicker updatedAmount = (NumberPicker) dialog.findViewById(R.id.update_number_picker);
-		//updatedAmount.setOn
-
 		Button cancel = (Button) dialog.findViewById(R.id.cancel_update);
 		cancel.setOnClickListener( new OnClickListener() {
 			public void onClick(View v){
@@ -387,7 +384,9 @@ public class FridgeActivity extends Activity {
 					Toast.makeText(getApplicationContext(), "Can't have Negative Items!", Toast.LENGTH_SHORT).show();
 				}
 				else{
-					updateItem(selectedItem, count);
+					FridgeItem item = new FridgeItem(selectedItem, count, getFridgeID(), FLAG_FOR_UPDATE_COUNT );
+					addItemToWeb(item);
+					queryServer(getFridgeID());
 				}
 				countBox.setText("");
 				dialog.dismiss();
@@ -418,6 +417,24 @@ public class FridgeActivity extends Activity {
 		// requery to refresh listview to reflect db changes
 		data.requery();
 	}
+	
+	protected void addItem(FridgeItem item) {
+
+		ContentValues updateItem = new ContentValues();
+		long itemId;
+
+		database = dataHelper.getWritableDatabase();
+
+		updateItem.put("name", item.getName());
+		updateItem.put("amount", item.getAmount());
+		updateItem.put("start_amount", item.getInital_amount());
+		updateItem.put("UPC", item.getUPC());
+
+		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, database.CONFLICT_IGNORE);
+
+		// requery to refresh listview to reflect db changes
+		data.requery();
+	}
 
 
 	/*
@@ -433,20 +450,6 @@ public class FridgeActivity extends Activity {
 		Log.v(TAG, "Item removed from db");
 	}
 
-
-	protected void updateUPC(String UPC){
-		//TODO Have to update the qurey the server for item with FLAG UPC, then replace it with UPC passed
-		ContentValues updateItem = new ContentValues();
-		database = dataHelper.getWritableDatabase();
-		String mySQL="SELECT * FROM " + DataHelper.SOURCE_TABLE_NAME + " WHERE UPC LIKE '"+ FLAG_FOR_UPDATE_UPC + "'";
-		this.data = database.rawQuery(mySQL, null);
-		this.data.moveToPosition(0);
-		updateItem.put("UPC", UPC);
-		database.updateWithOnConflict(DataHelper.SOURCE_TABLE_NAME, updateItem, null, null, database.CONFLICT_IGNORE);
-
-		// requery to refresh listview to reflect db changes
-		data.requery();
-	}
 
 	/*
 	 * update item with count
