@@ -148,6 +148,8 @@ public class FridgeActivity extends Activity {
 		}	
 		else if(requestCode == ADD_TO_FRIDGE_REQUEST){
 			//TODO use addItem method to add to local DB if json is handed back 
+			queryServer(getFridgeID());
+			
 		}
 		else if(requestCode == QUERY_REQUEST){
 			//TODO clear local database and repropagate with return data.
@@ -162,6 +164,7 @@ public class FridgeActivity extends Activity {
 				addItem(item);
 			}
 			this.data.requery();
+			//database.rawQuery(sql, selectionArgs)
 			
 		}
 		else {
@@ -243,7 +246,6 @@ public class FridgeActivity extends Activity {
 					}else{
 						FridgeItem itemToAdd = new FridgeItem(name, count, FridgeActivity.getFridgeID() , FridgeActivity.getScannedUPC());
 						addItemToWeb(itemToAdd);
-						queryServer(getFridgeID());
 					}
 					dialog.dismiss();
 				}
@@ -263,7 +265,7 @@ public class FridgeActivity extends Activity {
 	protected void queryServer(int fridgeID){
 		Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
 				com.wiscomfort.fridgeapp.WebDBActivity.class);
-		i.putExtra("fridge_id", fridgeID);
+		i.putExtra("fridge_id", 1);
 		startActivityForResult(i, QUERY_REQUEST);
 	}
 
@@ -325,7 +327,6 @@ public class FridgeActivity extends Activity {
 				if (!itemToAdd.isEmpty() && countToAdd > 0) { 
 					FridgeItem item = new FridgeItem(itemToAdd, countToAdd, getFridgeID(), "000000000");
 					addItemToWeb(item);
-					queryServer(getFridgeID());
 				}
 				else if(itemToAdd.isEmpty()){
 					Toast.makeText(getApplicationContext(), "Need a name to identify the item!", Toast.LENGTH_SHORT).show();
@@ -386,7 +387,6 @@ public class FridgeActivity extends Activity {
 				else{
 					FridgeItem item = new FridgeItem(selectedItem, count, getFridgeID(), FLAG_FOR_UPDATE_COUNT );
 					addItemToWeb(item);
-					queryServer(getFridgeID());
 				}
 				countBox.setText("");
 				dialog.dismiss();
@@ -415,7 +415,7 @@ public class FridgeActivity extends Activity {
 		itemId = database.insertWithOnConflict(DataHelper.SOURCE_TABLE_NAME, null, updateItem, database.CONFLICT_IGNORE);
 
 		// requery to refresh listview to reflect db changes
-		data.requery();
+		// data.requery();
 	}
 	
 	protected void addItem(FridgeItem item) {
