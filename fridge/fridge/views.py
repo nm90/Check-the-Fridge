@@ -129,7 +129,10 @@ def update_item(request):
         else:
             item_to_save = Item.objects.get(name=item_name)
             if item_to_save.amount >= 0:
-                item_to_save.amount += item_amount
+                if item_upc == "999999999":
+                    item_to_save.amount = item_amount
+                else:
+                    item_to_save.amount += item_amount
             else:
                 item_to_save.amount = item_amount
             item_to_save.initial_amount = item_amount
