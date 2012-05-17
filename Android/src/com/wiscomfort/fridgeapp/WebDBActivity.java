@@ -81,7 +81,7 @@ public class WebDBActivity extends Activity {
 				search_fridge_name 	+=	extras.getString("fridge_name");
 				urls[nITEMS_FROM_FRIDGE_NAME] 	= 	search_fridge_name;
 			}else if(extras.containsKey("fridge_id")){
-				search_fridge_id	+=	extras.getString("fridge_id");
+				search_fridge_id	+=	extras.getInt("fridge_id");
 				urls[nITEMS_FROM_FRIDGE_ID]		=	search_fridge_id;
 			}else{
 				//TODO return unknown extra detected
