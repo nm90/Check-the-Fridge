@@ -49,8 +49,10 @@ public class FridgeActivity extends Activity {
 	protected static final int SEARCH_FRIDGE_REQUEST = 201;
 	protected static final int ADD_TO_FRIDGE_REQUEST = 202;
 	protected static final int QUERY_REQUEST = 203;
+	protected static final int QUERY_VIA_FRIDGE_NAME_REQUEST = 204;
 	protected static final int ZXING_SCAN_FROM_ADD = 300;
 	protected static final int ZXING_SCAN_DIRECT = 301;
+	protected static final int ZXING_QR_SCAN = 302;
 	protected static final int WEB_SCAN_RESULT = 400;
 	protected static final String FLAG_FOR_UPDATE_COUNT = "999999999";
 
@@ -98,15 +100,10 @@ public class FridgeActivity extends Activity {
 			return true;
 
 		case R.id.change_fridge:
-			if(!this.getClass().equals(com.wiscomfort.fridgeapp.WebDBActivity.class)){
-				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
-						com.wiscomfort.fridgeapp.WebDBActivity.class);
-				String json_item = "[{\"pk\": \"Apple Jills\", \"model\": \"fridge.item\", "+ 
-						"\"fields\": {\"initial_amount\": 1, \"amount\": 1, \"fridge\": 1, \"upc\": \"042111111111\"}}]";
-				i.putExtra("item_to_add", json_item);
-				startActivityForResult(i, UPDATE_FRIDGE_REQUEST);
-			}
-
+			Intent i = new Intent("com.google.zxing.client.android.SCAN");
+			i.putExtra("SCAN_MODE", "QR_MODE");
+			startActivityForResult(i, ZXING_QR_SCAN);
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -126,13 +123,31 @@ public class FridgeActivity extends Activity {
 		
 		switch(requestCode){
 
-		case UPDATE_FRIDGE_REQUEST:
+		case ZXING_QR_SCAN:
+			if (data != null) {
+	            String response = data.getStringExtra("SCAN_RESULT");
+	            i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+	    				com.wiscomfort.fridgeapp.WebDBActivity.class);
+	    		i.putExtra("fridge_name", response);
+	    		startActivityForResult(i, QUERY_VIA_FRIDGE_NAME_REQUEST);
+			}
+			break;
+		case QUERY_VIA_FRIDGE_NAME_REQUEST:
 			extras = data.getExtras();
-			//TODO update list of items using the json here
 			json_string = (String) extras.get("json_items");
 			models = DjangoParser.parseJsonModels(json_string);
-
-			// TODO This is where we should update the FridgeView
+			ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
+			if(items.isEmpty() || items == null){
+				//TODO toast the user fridge not real
+			}
+			else{
+				fridgeID = items.get(0).getFridgeID();
+				database.delete(DataHelper.SOURCE_TABLE_NAME, null, null);
+				for(FridgeItem item : items){
+					addItem(item);
+				}
+				this.data.requery();
+			}
 			break;
 		
 		case ZXING_SCAN_DIRECT:
@@ -170,7 +185,7 @@ public class FridgeActivity extends Activity {
 			//TODO update list of items using the json here
 			json_string = (String) extras.get("json_items");
 			models = DjangoParser.parseJsonModels(json_string);
-			ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
+			items = DjangoParser.makeItemsFromModels(models);
 			// requery to refresh listview to reflect db change
 			for(FridgeItem item : items){
 				addItem(item);
