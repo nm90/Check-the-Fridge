@@ -137,7 +137,7 @@ public class FridgeActivity extends Activity {
 			extras = data.getExtras();
 			json_string = (String) extras.get("json_items");
 			models = DjangoParser.parseJsonModels(json_string);
-			ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
+			items = DjangoParser.makeItemsFromModels(models);
 			if(items.isEmpty() || items == null){
 				//TODO toast the user fridge not real
 			}
@@ -156,13 +156,8 @@ public class FridgeActivity extends Activity {
 			// This is where we want to try and add UPC to webserver
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
-<<<<<<< HEAD
-				FridgeActivity.scannedUPC = upc;
-				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
-=======
 				this.scannedUPC = upc;
 				i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
->>>>>>> 042763466a46a73200d25e3e274d2f076d15d305
 				com.wiscomfort.fridgeapp.WebDBActivity.class);
 				i.putExtra("upc", upc);
 				startActivityForResult(i, WEB_SCAN_RESULT);

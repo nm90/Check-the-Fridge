@@ -64,7 +64,7 @@ public class FridgeItem {
 		}
 		
 		public String getInitAmountString() {
-			return "" + this.amount;
+			return "" + this.inital_amount;
 		}
 
 		public String getFridgeIDString() {
