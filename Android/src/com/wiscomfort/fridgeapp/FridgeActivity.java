@@ -49,8 +49,10 @@ public class FridgeActivity extends Activity {
 	protected static final int SEARCH_FRIDGE_REQUEST = 201;
 	protected static final int ADD_TO_FRIDGE_REQUEST = 202;
 	protected static final int QUERY_REQUEST = 203;
+	protected static final int QUERY_VIA_FRIDGE_NAME_REQUEST = 204;
 	protected static final int ZXING_SCAN_FROM_ADD = 300;
 	protected static final int ZXING_SCAN_DIRECT = 301;
+	protected static final int ZXING_QR_SCAN = 302;
 	protected static final int WEB_SCAN_RESULT = 400;
 	protected static final String FLAG_FOR_UPDATE_COUNT = "999999999";
 
@@ -97,16 +99,11 @@ public class FridgeActivity extends Activity {
 
 			return true;
 
-		case R.id.show_inventory:
-			if(!this.getClass().equals(com.wiscomfort.fridgeapp.WebDBActivity.class)){
-				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
-						com.wiscomfort.fridgeapp.WebDBActivity.class);
-				String json_item = "[{\"pk\": \"Apple Jills\", \"model\": \"fridge.item\", "+ 
-						"\"fields\": {\"initial_amount\": 1, \"amount\": 1, \"fridge\": 1, \"upc\": \"042111111111\"}}]";
-				i.putExtra("item_to_add", json_item);
-				startActivityForResult(i, UPDATE_FRIDGE_REQUEST);
-			}
-
+		case R.id.change_fridge:
+			Intent i = new Intent("com.google.zxing.client.android.SCAN");
+			i.putExtra("SCAN_MODE", "QR_MODE");
+			startActivityForResult(i, ZXING_QR_SCAN);
+			return true;
 		default:
 			return super.onContextItemSelected(item);
 		}
@@ -120,57 +117,92 @@ public class FridgeActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == UPDATE_FRIDGE_REQUEST){
-			Bundle extras = data.getExtras();
-			//TODO update list of items using the json here
-			String json_string = (String) extras.get("json_items");
-			DjangoModel[] models = DjangoParser.parseJsonModels(json_string);
+		DjangoModel[] models;
+		Intent i;
+		Bundle extras;
+		String json_string;
+		
+		switch(requestCode){
 
-			// TODO This is where we should update the FridgeView
-			return;
-		}
-		else if (requestCode == ZXING_SCAN_DIRECT){
-
+		case ZXING_QR_SCAN:
+			if (data != null) {
+	            String response = data.getStringExtra("SCAN_RESULT");
+	            i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+	    				com.wiscomfort.fridgeapp.WebDBActivity.class);
+	    		i.putExtra("fridge_name", response);
+	    		startActivityForResult(i, QUERY_VIA_FRIDGE_NAME_REQUEST);
+			}
+			break;
+		case QUERY_VIA_FRIDGE_NAME_REQUEST:
+			extras = data.getExtras();
+			json_string = (String) extras.get("json_items");
+			models = DjangoParser.parseJsonModels(json_string);
+			ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
+			if(items.isEmpty() || items == null){
+				//TODO toast the user fridge not real
+			}
+			else{
+				fridgeID = items.get(0).getFridgeID();
+				database.delete(DataHelper.SOURCE_TABLE_NAME, null, null);
+				for(FridgeItem item : items){
+					addItem(item);
+				}
+				this.data.requery();
+			}
+			break;
+		
+		case ZXING_SCAN_DIRECT:
+			this.removeDialog(ADD_ITEM_DIALOG);
 			// This is where we want to try and add UPC to webserver
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
+<<<<<<< HEAD
 				FridgeActivity.scannedUPC = upc;
 				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+=======
+				this.scannedUPC = upc;
+				i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+>>>>>>> 042763466a46a73200d25e3e274d2f076d15d305
 				com.wiscomfort.fridgeapp.WebDBActivity.class);
 				i.putExtra("upc", upc);
 				startActivityForResult(i, WEB_SCAN_RESULT);
 			}
-		}
-		else if(requestCode == WEB_SCAN_RESULT){
+			
+			break;
+			
+		case WEB_SCAN_RESULT:
 			String webResult = data.getStringExtra("json_items");
-			DjangoModel[] models = DjangoParser.parseJsonModels(webResult);
+			models = DjangoParser.parseJsonModels(webResult);
 			items = DjangoParser.makeItemsFromModels(models);
 			this.showDialog(ADD_VIA_SCAN_DIALOG);
-		}	
-		else if(requestCode == ADD_TO_FRIDGE_REQUEST){
+			
+			break;
+			
+		case ADD_TO_FRIDGE_REQUEST:
 			//TODO use addItem method to add to local DB if json is handed back 
 			queryServer(getFridgeID());
 			
-		}
-		else if(requestCode == QUERY_REQUEST){
+			break;
+			
+		case QUERY_REQUEST:
 			//TODO clear local database and repropagate with return data.
 			database.delete(DataHelper.SOURCE_TABLE_NAME, null, null);
-			Bundle extras = data.getExtras();
+			extras = data.getExtras();
 			//TODO update list of items using the json here
-			String json_string = (String) extras.get("json_items");
-			DjangoModel[] models = DjangoParser.parseJsonModels(json_string);
-			ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
+			json_string = (String) extras.get("json_items");
+			models = DjangoParser.parseJsonModels(json_string);
+			items = DjangoParser.makeItemsFromModels(models);
 			// requery to refresh listview to reflect db change
 			for(FridgeItem item : items){
 				addItem(item);
 			}
 			this.data.requery();
 			//database.rawQuery(sql, selectionArgs)
-			
+		
+		default:
+			break;
 		}
-		else {
-			return;
-		}
+	
 	}
 
 
@@ -228,7 +260,7 @@ public class FridgeActivity extends Activity {
 			text.setText("Please ensure data from scan is correct!.");
 			scannedItem = scanResult.get(0);
 			name = scanResult.get(0).getName();
-			count = scanResult.get(0).getAmountString();
+			count = scanResult.get(0).getInitAmountString();
 
 			editItemName.setText(name);
 			editItemCount.setText(count);
@@ -256,6 +288,7 @@ public class FridgeActivity extends Activity {
 	}
 
 	protected void addItemToWeb(FridgeItem itemToAdd) {
+		this.removeDialog(ADD_VIA_SCAN_DIALOG);
 		Gson gson = new Gson();
 		String item_to_add = gson.toJson(itemToAdd);
 		Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,

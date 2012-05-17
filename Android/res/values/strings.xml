@@ -7,5 +7,5 @@
     <string name="submit_add">Add</string>
     <string name="submit_update">Update</string>
     <string name="cancel_update">Cancel</string>
-    <string name="show_inventory">Show Inventory</string>
+    <string name="change_fridge">Login to Fridge</string>
 </resources>
