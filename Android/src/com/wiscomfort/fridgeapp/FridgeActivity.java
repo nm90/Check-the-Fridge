@@ -136,6 +136,7 @@ public class FridgeActivity extends Activity {
 			break;
 		
 		case ZXING_SCAN_DIRECT:
+			this.removeDialog(ADD_ITEM_DIALOG);
 			// This is where we want to try and add UPC to webserver
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
@@ -237,7 +238,7 @@ public class FridgeActivity extends Activity {
 			text.setText("Please ensure data from scan is correct!.");
 			scannedItem = scanResult.get(0);
 			name = scanResult.get(0).getName();
-			count = scanResult.get(0).getAmountString();
+			count = scanResult.get(0).getInitAmountString();
 
 			editItemName.setText(name);
 			editItemCount.setText(count);
@@ -265,6 +266,7 @@ public class FridgeActivity extends Activity {
 	}
 
 	protected void addItemToWeb(FridgeItem itemToAdd) {
+		this.removeDialog(ADD_VIA_SCAN_DIALOG);
 		Gson gson = new Gson();
 		String item_to_add = gson.toJson(itemToAdd);
 		Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
