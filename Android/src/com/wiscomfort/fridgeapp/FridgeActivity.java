@@ -119,45 +119,56 @@ public class FridgeActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode,
 			Intent data) {
 		super.onActivityResult(requestCode, resultCode, data);
-		if (requestCode == UPDATE_FRIDGE_REQUEST){
-			Bundle extras = data.getExtras();
+		DjangoModel[] models;
+		Intent i;
+		Bundle extras;
+		String json_string;
+		
+		switch(requestCode){
+
+		case UPDATE_FRIDGE_REQUEST:
+			extras = data.getExtras();
 			//TODO update list of items using the json here
-			String json_string = (String) extras.get("json_items");
-			DjangoModel[] models = DjangoParser.parseJsonModels(json_string);
+			json_string = (String) extras.get("json_items");
+			models = DjangoParser.parseJsonModels(json_string);
 
 			// TODO This is where we should update the FridgeView
-			return;
-		}
-		else if (requestCode == ZXING_SCAN_DIRECT){
-
+			break;
+		
+		case ZXING_SCAN_DIRECT:
 			// This is where we want to try and add UPC to webserver
 			String upc = data.getStringExtra("SCAN_RESULT");
 			if(Pattern.matches("[0-9]{1,13}", upc)) {
 				this.scannedUPC = upc;
-				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
+				i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
 				com.wiscomfort.fridgeapp.WebDBActivity.class);
 				i.putExtra("upc", upc);
 				startActivityForResult(i, WEB_SCAN_RESULT);
 			}
-		}
-		else if(requestCode == WEB_SCAN_RESULT){
+			
+			break;
+			
+		case WEB_SCAN_RESULT:
 			String webResult = data.getStringExtra("json_items");
-			DjangoModel[] models = DjangoParser.parseJsonModels(webResult);
+			models = DjangoParser.parseJsonModels(webResult);
 			items = DjangoParser.makeItemsFromModels(models);
 			this.showDialog(ADD_VIA_SCAN_DIALOG);
-		}	
-		else if(requestCode == ADD_TO_FRIDGE_REQUEST){
+			
+			break;
+			
+		case ADD_TO_FRIDGE_REQUEST:
 			//TODO use addItem method to add to local DB if json is handed back 
 			queryServer(getFridgeID());
 			
-		}
-		else if(requestCode == QUERY_REQUEST){
+			break;
+			
+		case QUERY_REQUEST:
 			//TODO clear local database and repropagate with return data.
 			database.delete(DataHelper.SOURCE_TABLE_NAME, null, null);
-			Bundle extras = data.getExtras();
+			extras = data.getExtras();
 			//TODO update list of items using the json here
-			String json_string = (String) extras.get("json_items");
-			DjangoModel[] models = DjangoParser.parseJsonModels(json_string);
+			json_string = (String) extras.get("json_items");
+			models = DjangoParser.parseJsonModels(json_string);
 			ArrayList<FridgeItem> items = DjangoParser.makeItemsFromModels(models);
 			// requery to refresh listview to reflect db change
 			for(FridgeItem item : items){
@@ -165,11 +176,11 @@ public class FridgeActivity extends Activity {
 			}
 			this.data.requery();
 			//database.rawQuery(sql, selectionArgs)
-			
+		
+		default:
+			break;
 		}
-		else {
-			return;
-		}
+	
 	}
 
 
