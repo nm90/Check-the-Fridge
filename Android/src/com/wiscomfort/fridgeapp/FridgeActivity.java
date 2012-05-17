@@ -98,7 +98,9 @@ public class FridgeActivity extends Activity {
 			this.showDialog(ADD_ITEM_DIALOG);
 
 			return true;
-
+		case R.id.refresh_fridge:
+			queryServer(fridgeID);
+			return true;
 		case R.id.change_fridge:
 			Intent i = new Intent("com.google.zxing.client.android.SCAN");
 			i.putExtra("SCAN_MODE", "QR_MODE");
@@ -249,7 +251,16 @@ public class FridgeActivity extends Activity {
 			text.setText("UPC not in database add it now!.");
 			editItemName.setText("Name");
 			editItemCount.setText("Count");
-			
+			editItemName.setOnClickListener( new OnClickListener() {
+				public void onClick(View v){
+					editItemName.setText("");
+				}
+			});
+			editItemCount.setOnClickListener( new OnClickListener() {
+				public void onClick(View v){
+					editItemCount.setText("");
+				}
+			});
 		}
 		else if(scanResult != null){
 			text.setText("Please ensure data from scan is correct!.");
