@@ -124,7 +124,7 @@ def update_item(request):
 
         # if UPC code and Item pair already match add to
         # current amount
-        if len(Item.objects.filter(fridge_id=item_fridge_id).filter(name=item_name)) == 0:
+        if len(Item.objects.filter(fridge__id=item_fridge_id).filter(name=item_name)) == 0:
             item_to_save = Item(name=item_name, amount=item_amount, initial_amount=item_initamount, fridge=fridge_obj, upc=item_upc)
         else:
             item_to_save = Item.objects.get(name=item_name)
