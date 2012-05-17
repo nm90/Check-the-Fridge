@@ -2,14 +2,21 @@ package com.wiscomfort.fridgeapp;
 
 import java.util.ArrayList;
 
+import android.app.Dialog;
+import android.content.ContentValues;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import android.util.Log;
 import android.view.View;
 
 /**Dialog

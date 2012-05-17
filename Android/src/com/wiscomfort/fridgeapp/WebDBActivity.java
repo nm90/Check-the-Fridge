@@ -1,6 +1,7 @@
 package com.wiscomfort.fridgeapp;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.Header;
@@ -12,10 +13,15 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import com.google.gson.Gson;
@@ -109,7 +115,6 @@ public class WebDBActivity extends Activity {
 		/** The system calls this to perform work in a worker thread and
 		 * delivers it the parameters given to AsyncTask.execute() 
 		 * @return */
-		@Override
 		protected String doInBackground(String... urls) {
 			HttpClient httpclient = new DefaultHttpClient();
 			JSONArray result = new JSONArray();
@@ -220,7 +225,6 @@ public class WebDBActivity extends Activity {
 
 		/** The system calls this to perform work in the UI thread and delivers
 		 * the result from doInBackground() */
-		@Override
 		protected void onPostExecute(String result) {
 			onPostDownloadListener(result);
 
