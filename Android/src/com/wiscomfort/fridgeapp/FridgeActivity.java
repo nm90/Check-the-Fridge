@@ -64,7 +64,7 @@ public class FridgeActivity extends Activity {
 	protected String selectedItem;
 	private String scannedUPC;
 	private ArrayList<FridgeItem> items;
-	private int fridgeID;
+	private static int fridgeID;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -139,7 +139,7 @@ public class FridgeActivity extends Activity {
 			models = DjangoParser.parseJsonModels(json_string);
 			items = DjangoParser.makeItemsFromModels(models);
 			if(items.isEmpty() || items == null){
-				//TODO toast the user fridge not real
+				Toast.makeText(getApplicationContext(), "This Fridge is not in our database", Toast.LENGTH_SHORT).show();
 			}
 			else{
 				fridgeID = items.get(0).getFridgeID();
@@ -275,6 +275,7 @@ public class FridgeActivity extends Activity {
 					}else{
 						FridgeItem itemToAdd = new FridgeItem(name, count, getFridgeID(), getScannedUPC());
 						addItemToWeb(itemToAdd);
+						//fridgeID = items.get(0).getFridgeID();
 					}
 					dialog.dismiss();
 				}
@@ -502,7 +503,7 @@ public class FridgeActivity extends Activity {
 	protected String getScannedUPC(){
 		return scannedUPC;
 	}
-	protected int getFridgeID(){
+	protected static int getFridgeID(){
 		return fridgeID;
 	}
 
