@@ -30,33 +30,26 @@
         android:orientation="vertical"
         android:padding="0dp" >
 
-		<Button
-            android:id="@+id/add_via_scan"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/add_scan" />
-	    <TextView
+        <TextView
             android:id="@+id/add_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFF" />
+
         <EditText
             android:id="@+id/add_item_name"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Name" />
+            android:layout_height="wrap_content"/>
         <EditText
             android:id="@+id/add_item_count"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-			android:text="Count"/>
+            android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/submit_add"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="@string/submit_add" />
-                      
     </LinearLayout>
 
 </LinearLayout>

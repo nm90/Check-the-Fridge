@@ -18,7 +18,7 @@ public class DataHelper extends SQLiteOpenHelper {
 	    private static final int DATABASE_VERSION = 2;
 	    protected static final String SOURCE_TABLE_NAME = "tbl_fridge_contents";
 	    
-		private static final String CREATE_RSS_TABLE =
+		private static final String CREATE_TABLE =
     			"CREATE TABLE "+SOURCE_TABLE_NAME+"(	"+
     					BaseColumns._ID +
     						" INTEGER PRIMARY KEY AUTOINCREMENT,	"+
@@ -35,7 +35,7 @@ public class DataHelper extends SQLiteOpenHelper {
 
 	    @Override
 	    public void onCreate(SQLiteDatabase db) {
-	        db.execSQL(CREATE_RSS_TABLE);
+	        db.execSQL(CREATE_TABLE);
 	    }
 
 		@Override
