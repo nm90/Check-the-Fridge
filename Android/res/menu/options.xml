@@ -5,7 +5,7 @@
         android:id="@+id/add_item"
         android:title="@string/add_items"/>
     <item
-        android:id="@+id/show_inventory"
-        android:title="@string/show_inventory"/>
+        android:id="@+id/change_fridge"
+        android:title="@string/change_fridge"/>
 
 </menu>

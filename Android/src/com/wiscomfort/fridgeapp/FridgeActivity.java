@@ -97,7 +97,7 @@ public class FridgeActivity extends Activity {
 
 			return true;
 
-		case R.id.show_inventory:
+		case R.id.change_fridge:
 			if(!this.getClass().equals(com.wiscomfort.fridgeapp.WebDBActivity.class)){
 				Intent i = new Intent(com.wiscomfort.fridgeapp.FridgeActivity.this,
 						com.wiscomfort.fridgeapp.WebDBActivity.class);
